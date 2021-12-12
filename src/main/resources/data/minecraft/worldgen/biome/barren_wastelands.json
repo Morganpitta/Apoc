@@ -1,0 +1,21 @@
+{
+  "temperature": 1,
+  "downfall": 0.1,
+  "precipitation": "none",
+  "category": "desert",
+  "effects": {
+    "sky_color": 2582448,
+    "fog_color": 13417748,
+    "water_color": 3158789,
+    "water_fog_color": 3158789
+  },
+  "spawners": {},
+  "spawn_costs": {},
+  "carvers": {},
+  "features": [
+    [
+      "minecraft:patch_dead_bush",
+      "minecraft:patch_dead_bush_2"
+    ]
+  ]
+}

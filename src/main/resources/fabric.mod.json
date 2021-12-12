@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "id": "modid",
+  "id": "morgan",
   "version": "${version}",
 
-  "name": "Example Mod",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "name": "Apocalypse ",
+  "description": "Apocalypse mod?",
   "authors": [
-    "Me!"
+    "Morgan"
   ],
   "contact": {
     "homepage": "https://fabricmc.net/",
