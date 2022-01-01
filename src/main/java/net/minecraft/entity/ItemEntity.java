@@ -9,11 +9,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import net.minecraft.entity.Entity.MoveEffect;
+
+import net.fabricmc.morgan.entity.effect.StatusEffects;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -313,9 +316,16 @@ public class ItemEntity extends Entity {
             ItemStack itemStack = this.getStack();
             Item item = itemStack.getItem();
             int i = itemStack.getCount();
-            if (this.pickupDelay == 0 && (this.owner == null || this.owner.equals(player.getUuid())) && player.getInventory().insertStack(itemStack)) {
+            if ((this.owner == null || this.owner.equals(player.getUuid())) && player.getInventory().insertStack(itemStack)) {
                 player.sendPickup(this, i);
-                player.damage(DamageSource.GENERIC,i);
+                player.SwitchJump();
+                AnimalEntity Goat = EntityType.GOAT.spawn((ServerWorld) world, null, Text.of(player.getEntityName() +"'s Goat"), player, new BlockPos(player.getX(),player.getY()+1,player.getZ()), SpawnReason.JOCKEY,false,false);
+                Goat.shouldRenderName();
+                Goat.setYaw(player.getYaw());
+                Goat.setPitch(player.getPitch());
+                Goat.addStatusEffect(new StatusEffectInstance(StatusEffects.GOAT,100000,4));
+                player.giveItemStack(new ItemStack(Items.BEDROCK));
+                player.setYaw(getYaw()+i);
                 if (itemStack.isEmpty()) {
                     this.discard();
                     itemStack.setCount(i);
