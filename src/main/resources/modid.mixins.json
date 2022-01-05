@@ -4,6 +4,12 @@
   "package": "net.fabricmc.morgan.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
+    "entity.ItemEntityMixin",
+    "entity.passive.ChickenEntityMixin",
+    "entity.player.PlayerEntityMixin",
+    "entity.passive.CowEntityMixin",
+    "entity.EntityMixin",
+    "entity.LivingEntityMixin"
   ],
   "client": [
     "ExampleMixin"

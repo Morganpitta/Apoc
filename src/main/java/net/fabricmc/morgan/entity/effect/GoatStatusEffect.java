@@ -1,15 +1,9 @@
 package net.fabricmc.morgan.entity.effect;
 
-import net.minecraft.entity.EntityType;
+import net.fabricmc.morgan.entity.damage.DamageSource;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectCategory;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.stat.Stats;
-import net.minecraft.world.World;
-import net.minecraft.world.event.GameEvent;
 
 public class GoatStatusEffect extends StatusEffect {
     public GoatStatusEffect() {
@@ -29,7 +23,7 @@ public class GoatStatusEffect extends StatusEffect {
     @Override
     public void applyUpdateEffect(LivingEntity entity, int amplifier) {
         if (entity instanceof LivingEntity) {
-            entity.damage(DamageSource.WITHER, amplifier+1);
+            entity.damage(DamageSource.GOAT, amplifier+1);
         }
     }
 }
