@@ -3,6 +3,7 @@ package net.fabricmc.morgan.mixin.entity;
 import jdk.jfr.SettingDefinition;
 import net.fabricmc.morgan.ExampleMod;
 import net.fabricmc.morgan.entity.EntityExtension;
+import net.fabricmc.morgan.world.entity.Bounciness;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -177,11 +178,23 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
             } else {
                 Vec3d vec3d2 = this.getVelocity();
                 if (movement.x != vec3d.x) {
-                    this.setVelocity(0.0D, vec3d2.y, vec3d2.z);
+                    if (isBouncy())
+                    {
+                        this.setVelocity(-vec3d.x*Bounciness.Bounciness, vec3d2.y, vec3d2.z);
+                    }
+                    else{
+                        this.setVelocity(0.0D, vec3d2.y, vec3d2.z);
+                    }
                 }
 
                 if (movement.z != vec3d.z) {
-                    this.setVelocity(vec3d2.x, vec3d2.y, 0.0D);
+                    if (isBouncy())
+                    {
+                        this.setVelocity(vec3d.x, vec3d2.y, -vec3d2.z*Bounciness.Bounciness);
+                    }
+                    else{
+                        this.setVelocity(vec3d.x, vec3d2.y, 0.0D);
+                    }
                 }
 
                 Block block = blockState.getBlock();
@@ -193,7 +206,7 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
                     if (isBouncy()&&vec3d.y<0.0D)
                     {
                         this.handleFallDamage(fallDistance, 0.0F, DamageSource.FALL);
-                        this.setVelocity(vec3d.x, -vec3d2.y, vec3d.z);
+                        this.setVelocity(vec3d.x, -vec3d2.y*(Bounciness.Bounciness*1.1), vec3d.z);
                     }
                     block.onSteppedOn(this.world, blockPos, blockState, (Entity) (Object) this);
                 }

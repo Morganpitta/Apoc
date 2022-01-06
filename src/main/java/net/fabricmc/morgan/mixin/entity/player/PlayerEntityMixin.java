@@ -94,7 +94,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
     }
     public int SleepSheep = 0;
     public boolean CanJump=true;
-    public boolean isBouncy(){return true;}
+    public boolean isBouncy(){return false;}
     @Shadow protected HungerManager hungerManager = new HungerManager();
     @Shadow private final PlayerAbilities abilities = new PlayerAbilities();
     @Shadow public void incrementStat(Identifier stat) {this.incrementStat(Stats.CUSTOM.getOrCreateStat(stat));}

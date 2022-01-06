@@ -4,6 +4,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.morgan.block.Blocks;
 import net.fabricmc.morgan.entity.damage.DamageSource;
 import net.fabricmc.morgan.entity.effect.StatusEffects;
+import net.fabricmc.morgan.server.command.BouncinessCommand;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -16,5 +17,6 @@ public class ExampleMod implements ModInitializer {
         Blocks.init();
         StatusEffects.init();
         DamageSource.init();
+        BouncinessCommand.init();
     }
 }
