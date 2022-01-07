@@ -13,7 +13,9 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.TranslatableText;
 
 import java.util.Collection;
+import java.util.Iterator;
 
+/**
 public class BouncyCommand {
     public BouncyCommand() {
     }
@@ -39,8 +41,15 @@ public class BouncyCommand {
     }
 
     private static int execute(ServerCommandSource source, Collection<ServerPlayerEntity> targets) throws CommandSyntaxException {
-        Bounciness.Bounciness = bounciness;
+        Iterator var6 = targets.iterator();
+
+        label44:
+        while(var6.hasNext()) {
+            ServerPlayerEntity serverPlayerEntity = (ServerPlayerEntity)var6.next();
+            serverPlayerEntity.world.
+        }
         source.sendFeedback(new TranslatableText("commands.bounciness.success.single", new Object[]{bounciness}),false);
         return 1;
     }
-}
+ }
+**/

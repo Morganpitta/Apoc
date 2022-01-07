@@ -19,7 +19,7 @@ public class Blocks {
     }
 
     static {
-        WITHERED_BLOCK = register("withered_block", new WitheredBlock(AbstractBlock.Settings.of(Material.MOSS_BLOCK, MapColor.GREEN).strength(0.1F).sounds(BlockSoundGroup.MOSS_BLOCK)));
+        WITHERED_BLOCK = register("withered_block", new WitheredBlock());
         Iterator var0 = Registry.BLOCK.iterator();
     }
 
