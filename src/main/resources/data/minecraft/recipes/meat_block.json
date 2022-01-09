@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "MMM",
+    "MMM",
+    "MMM"
+  ],
+  "key": {
+    "M": {
+      "tag": "minecraft:meat"
+    }
+  },
+  "result": {
+    "item": "morgan:meat_block",
+    "count": 1
+  }
+}

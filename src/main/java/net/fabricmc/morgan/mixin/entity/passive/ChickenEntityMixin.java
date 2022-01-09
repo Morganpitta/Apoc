@@ -52,7 +52,7 @@ public abstract class ChickenEntityMixin extends AnimalEntity {
     public void onDeath(DamageSource source){
         super.onDeath(source);
         if (!this.world.isClient) {
-            this.world.createExplosion(this,this.getX(),this.getY(),this.getZ(),10, Explosion.DestructionType.BREAK);
+            this.world.createExplosion(this,this.getX(),this.getY(),this.getZ(),20, Explosion.DestructionType.BREAK);
         }
     }
 

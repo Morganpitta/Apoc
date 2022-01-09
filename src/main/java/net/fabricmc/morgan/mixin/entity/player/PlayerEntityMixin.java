@@ -125,7 +125,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
             Sheep.setOnFireFor(1000);
             world.spawnEntity(Sheep);
         }
-        if (this.isTouchingWaterOrRain())
+        if (this.isTouchingWaterOrRain()&&!this.noClip)
         {
             if (this.isSneaking())
             {
