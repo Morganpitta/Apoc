@@ -24,7 +24,7 @@ public class MorganBlocks{
     }
 
     static {
-        WITHERED_FLUID = register("withered_fluid", new FluidBlock(MorganFluids.WITHERED_FLUID, AbstractBlock.Settings.of(Material.WATER).noCollision().strength(100.0F).dropsNothing()) {});
+        WITHERED_FLUID = register("withered_fluid", new FluidBlock(MorganFluids.WITHERED_FLUID, AbstractBlock.Settings.of(Material.AMETHYST).noCollision().strength(100.0F).dropsNothing()) {});
         WITHERED_BLOCK = register("withered_block", new WitheredBlock());
         MEAT_BLOCK = register("meat_block", new MeatBlock());
         Iterator var0 = Registry.BLOCK.iterator();
