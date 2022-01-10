@@ -17,7 +17,7 @@ public class ExampleModClient implements ClientModInitializer {
         FluidRenderHandlerRegistry.INSTANCE.register(MorganFluids.WITHERED_FLUID, MorganFluids.FLOWING_WITHERED_FLUID, new SimpleFluidRenderHandler(
                 new Identifier("morgan:block/withered_material"),
                 new Identifier("morgan:block/withered_material"),
-                0
+                10684167
         ));
 
         BlockRenderLayerMap.INSTANCE.putFluids(RenderLayer.getTranslucent(), MorganFluids.WITHERED_FLUID, MorganFluids.FLOWING_WITHERED_FLUID);

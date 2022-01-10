@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "morgan:withered_block",
+    "morgan:withered_fluid"
+  ]
+}
