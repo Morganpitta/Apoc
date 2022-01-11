@@ -14,7 +14,7 @@
     "minecraft:moving_piston",
     "minecraft:obsidian",
     "minecraft:crying_obsidian",
-    "morgan:withered_block",
-    "morgan:withered_fluid"
+    "morgan:corrupted_block",
+    "morgan:corrupted_fluid"
   ]
 }

@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/cube_all",
   "textures": {
-    "all": "morgan:block/withered_material"
+    "all": "morgan:block/chlorine_gas"
   }
 }

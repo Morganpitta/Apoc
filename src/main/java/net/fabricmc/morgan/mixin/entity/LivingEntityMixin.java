@@ -122,7 +122,7 @@ public abstract class LivingEntityMixin extends Entity implements EntityExtensio
                 }
             }
 
-            if ((this.isSubmergedIn(FluidTags.WATER) ||this.isSubmergedIn(FluidTags.WITHERED_FLUIDS)) && !this.world.getBlockState(new BlockPos(this.getX(), this.getEyeY(), this.getZ())).isOf(Blocks.BUBBLE_COLUMN)) {
+            if ((this.isSubmergedIn(FluidTags.WATER) ||this.isSubmergedIn(FluidTags.CORRUPTED_FLUIDS)) && !this.world.getBlockState(new BlockPos(this.getX(), this.getEyeY(), this.getZ())).isOf(Blocks.BUBBLE_COLUMN)) {
                 boolean d = !this.canBreatheInWater() && !StatusEffectUtil.hasWaterBreathing((LivingEntity) (Entity)this) && (!bl || !((PlayerEntity)(Entity)this).getAbilities().invulnerable);
                 if (d) {
                     this.setAir(this.getNextAirUnderwater(this.getAir()));

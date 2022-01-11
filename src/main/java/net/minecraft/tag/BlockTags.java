@@ -145,7 +145,7 @@ public final class BlockTags {
     public static final Identified<Block> REPLACEABLE_PLANTS;
     public static final Identified<Block> CANTBEWITHERED;
     public static final Identified<Block> FLUIDS;
-    public static final Identified<Block> WITHERED_MATERIALS;
+    public static final Identified<Block> CORRUPTED_MATERIALS;
 
     private BlockTags() {
     }
@@ -160,8 +160,8 @@ public final class BlockTags {
 
     static {
         REQUIRED_TAGS = RequiredTagListRegistry.register(Registry.BLOCK_KEY, "tags/blocks");
-        CANTBEWITHERED = register("cant_be_withered");
-        WITHERED_MATERIALS = register("withered_materials");
+        CANTBEWITHERED = register("cant_be_corrupted");
+        CORRUPTED_MATERIALS = register("corrupted_materials");
         FLUIDS = register("fluids");
         WOOL = register("wool");
         PLANKS = register("planks");

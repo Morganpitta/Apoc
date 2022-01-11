@@ -1,10 +1,7 @@
 package net.fabricmc.morgan.block;
 
 import net.fabricmc.morgan.fluid.MorganFluids;
-import net.fabricmc.morgan.mixin.block.FluidBlockMixin;
 import net.minecraft.block.*;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
@@ -12,9 +9,10 @@ import java.util.Iterator;
 
 
 public class MorganBlocks{
-    public static final Block WITHERED_BLOCK;
+    public static final Block CORRUPTED_BLOCK;
     public static final Block MEAT_BLOCK;
-    public static final Block WITHERED_FLUID;
+    public static final Block CORRUPTED_FLUID;
+    public static final Block CHLORINE_GAS;
 
     public MorganBlocks() {
     }
@@ -24,9 +22,10 @@ public class MorganBlocks{
     }
 
     static {
-        WITHERED_FLUID = register("withered_fluid", new FluidBlock(MorganFluids.WITHERED_FLUID, AbstractBlock.Settings.of(Material.AMETHYST).noCollision().strength(100.0F).dropsNothing()) {});
-        WITHERED_BLOCK = register("withered_block", new WitheredBlock());
+        CORRUPTED_FLUID = register("corrupted_fluid", new FluidBlock(MorganFluids.CORRUPTED_FLUID, AbstractBlock.Settings.of(Material.AMETHYST).noCollision().strength(100.0F).dropsNothing().nonOpaque()) {});
+        CORRUPTED_BLOCK = register("corrupted_block", new CorruptedBlock());
         MEAT_BLOCK = register("meat_block", new MeatBlock());
+        CHLORINE_GAS = register("chlorine_gas",new ChlorineGas());
         Iterator var0 = Registry.BLOCK.iterator();
     }
 

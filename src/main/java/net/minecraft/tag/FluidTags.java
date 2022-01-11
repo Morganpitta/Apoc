@@ -16,7 +16,7 @@ public final class FluidTags {
     private static final List<Tag<Fluid>> TAGS;
     public static final Identified<Fluid> WATER;
     public static final Identified<Fluid> LAVA;
-    public static final Identified<Fluid> WITHERED_FLUIDS;
+    public static final Identified<Fluid> CORRUPTED_FLUIDS;
 
     private FluidTags() {
     }
@@ -42,6 +42,6 @@ public final class FluidTags {
         TAGS = Lists.newArrayList();
         WATER = register("water");
         LAVA = register("lava");
-        WITHERED_FLUIDS = register("withered_fluids");
+        CORRUPTED_FLUIDS = register("corrupted_fluids");
     }
 }

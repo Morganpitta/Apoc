@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "morgan:corrupted_block",
+    "morgan:corrupted_fluid"
+  ]
+}

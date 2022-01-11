@@ -12,8 +12,8 @@ import java.util.Random;
 
 import net.minecraft.world.World;
 
-public class WitheredBlock extends Block {
-    public WitheredBlock() {
+public class CorruptedBlock extends Block {
+    public CorruptedBlock() {
         super(AbstractBlock.Settings.of(Material.AMETHYST).strength(1.0F).sounds(BlockSoundGroup.AMETHYST_BLOCK).ticksRandomly().resistance(1200));
     }
 
@@ -39,50 +39,50 @@ public class WitheredBlock extends Block {
     public void grow(ServerWorld world, Random random, BlockPos pos, BlockState state) {
         if(!(world.getBlockState(pos.up()).isAir()||world.getBlockState(pos.up()).isIn(BlockTags.CANTBEWITHERED))){
             if (world.getBlockState(pos.up()).isIn(BlockTags.FLUIDS)) {
-                world.setBlockState(pos.up(), MorganBlocks.WITHERED_FLUID.getDefaultState());
+                world.setBlockState(pos.up(), MorganBlocks.CORRUPTED_FLUID.getDefaultState());
             }
             else {
-                world.setBlockState(pos.up(), MorganBlocks.WITHERED_BLOCK.getDefaultState());
+                world.setBlockState(pos.up(), MorganBlocks.CORRUPTED_BLOCK.getDefaultState());
             }
         }
         if(!(world.getBlockState(pos.down()).isAir()||world.getBlockState(pos.down()).isIn(BlockTags.CANTBEWITHERED))){
             if (world.getBlockState(pos.down()).isIn(BlockTags.FLUIDS)) {
-                world.setBlockState(pos.down(), MorganBlocks.WITHERED_FLUID.getDefaultState());
+                world.setBlockState(pos.down(), MorganBlocks.CORRUPTED_FLUID.getDefaultState());
             }
             else {
-                world.setBlockState(pos.down(), MorganBlocks.WITHERED_BLOCK.getDefaultState());
+                world.setBlockState(pos.down(), MorganBlocks.CORRUPTED_BLOCK.getDefaultState());
             }
         }
         if(!(world.getBlockState(pos.south()).isAir()||world.getBlockState(pos.south()).isIn(BlockTags.CANTBEWITHERED))){
             if (world.getBlockState(pos.south()).isIn(BlockTags.FLUIDS)) {
-                world.setBlockState(pos.south(), MorganBlocks.WITHERED_FLUID.getDefaultState());
+                world.setBlockState(pos.south(), MorganBlocks.CORRUPTED_FLUID.getDefaultState());
             }
             else {
-                world.setBlockState(pos.south(), MorganBlocks.WITHERED_BLOCK.getDefaultState());
+                world.setBlockState(pos.south(), MorganBlocks.CORRUPTED_BLOCK.getDefaultState());
             }
         }
         if(!(world.getBlockState(pos.north()).isAir()||world.getBlockState(pos.north()).isIn(BlockTags.CANTBEWITHERED))){
             if (world.getBlockState(pos.north()).isIn(BlockTags.FLUIDS)) {
-                world.setBlockState(pos.north(), MorganBlocks.WITHERED_FLUID.getDefaultState());
+                world.setBlockState(pos.north(), MorganBlocks.CORRUPTED_FLUID.getDefaultState());
             }
             else {
-                world.setBlockState(pos.north(), MorganBlocks.WITHERED_BLOCK.getDefaultState());
+                world.setBlockState(pos.north(), MorganBlocks.CORRUPTED_BLOCK.getDefaultState());
             }
         }
         if(!(world.getBlockState(pos.west()).isAir()||world.getBlockState(pos.west()).isIn(BlockTags.CANTBEWITHERED))){
             if (world.getBlockState(pos.west()).isIn(BlockTags.FLUIDS)) {
-                world.setBlockState(pos.west(), MorganBlocks.WITHERED_FLUID.getDefaultState());
+                world.setBlockState(pos.west(), MorganBlocks.CORRUPTED_FLUID.getDefaultState());
             }
             else {
-                world.setBlockState(pos.west(), MorganBlocks.WITHERED_BLOCK.getDefaultState());
+                world.setBlockState(pos.west(), MorganBlocks.CORRUPTED_BLOCK.getDefaultState());
             }
         }
         if(!(world.getBlockState(pos.east()).isAir()||world.getBlockState(pos.east()).isIn(BlockTags.CANTBEWITHERED))){
             if (world.getBlockState(pos.east()).isIn(BlockTags.FLUIDS)) {
-                world.setBlockState(pos.east(), MorganBlocks.WITHERED_FLUID.getDefaultState());
+                world.setBlockState(pos.east(), MorganBlocks.CORRUPTED_FLUID.getDefaultState());
             }
             else {
-                world.setBlockState(pos.east(), MorganBlocks.WITHERED_BLOCK.getDefaultState());
+                world.setBlockState(pos.east(), MorganBlocks.CORRUPTED_BLOCK.getDefaultState());
             }
         }
     }
