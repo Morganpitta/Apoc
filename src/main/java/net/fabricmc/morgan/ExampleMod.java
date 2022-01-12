@@ -7,6 +7,7 @@ import net.fabricmc.morgan.entity.effect.StatusEffects;
 import net.fabricmc.morgan.fluid.MorganFluids;
 import net.fabricmc.morgan.item.MorganItems;
 import net.fabricmc.morgan.server.command.BouncinessCommand;
+import net.fabricmc.morgan.server.command.BouncyCommand;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -20,6 +21,7 @@ public class ExampleMod implements ModInitializer {
         StatusEffects.init();
         DamageSource.init();
         BouncinessCommand.init();
+        BouncyCommand.init();
         MorganFluids.init();
         MorganItems.init();
     }

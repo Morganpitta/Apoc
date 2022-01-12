@@ -75,7 +75,7 @@ public abstract class LivingEntityMixin extends Entity implements EntityExtensio
     @Overwrite
     public boolean handleFallDamage(float fallDistance, float damageMultiplier, DamageSource damageSource){
         boolean bl = super.handleFallDamage(fallDistance, damageMultiplier, damageSource);
-        if(this.isBouncy()){
+        if(this.isBouncy){
             return false;
         }
         else {

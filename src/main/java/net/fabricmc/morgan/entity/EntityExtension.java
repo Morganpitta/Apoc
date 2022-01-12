@@ -1,5 +1,7 @@
 package net.fabricmc.morgan.entity;
 
+
 public interface EntityExtension {
-    boolean isBouncy();
+    boolean isBouncy=false;
 }
+

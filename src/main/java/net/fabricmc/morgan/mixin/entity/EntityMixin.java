@@ -33,9 +33,8 @@ import java.util.UUID;
 @Mixin(Entity.class)
 public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutput, EntityExtension {
 
-    public boolean isBouncy() {
-        return false;
-    }
+    public boolean isBouncy = false;
+    public void setBouncy(Boolean bool){isBouncy=bool;}
     @Shadow abstract public void onLanding();
     @Shadow public float fallDistance;
     @Shadow public boolean noClip;
@@ -178,7 +177,7 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
             } else {
                 Vec3d vec3d2 = this.getVelocity();
                 if (movement.x != vec3d.x) {
-                    if (isBouncy())
+                    if (isBouncy)
                     {
                         this.setVelocity(-vec3d.x*Bounciness.Bounciness, vec3d2.y, vec3d2.z);
                     }
@@ -188,7 +187,7 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
                 }
 
                 if (movement.z != vec3d.z) {
-                    if (isBouncy())
+                    if (isBouncy)
                     {
                         this.setVelocity(vec3d.x, vec3d2.y, -vec3d2.z*Bounciness.Bounciness);
                     }
@@ -203,7 +202,7 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
                 }
 
                 if (this.onGround && !this.bypassesSteppingEffects()) {
-                    if (isBouncy()&&vec3d.y<0.0D)
+                    if (isBouncy&&vec3d.y<0.0D)
                     {
                         this.handleFallDamage(fallDistance, 0.0F, DamageSource.FALL);
                         this.setVelocity(vec3d.x, -vec3d2.y*(Bounciness.Bounciness*1.1), vec3d.z);
