@@ -34,7 +34,7 @@ import java.util.UUID;
 public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutput, EntityExtension {
 
     public boolean isBouncy = false;
-    public void setBouncy(Boolean bool){ExampleMod.LOGGER.info("setting bool");isBouncy=bool;}
+    public void setBouncy(boolean bool){ExampleMod.LOGGER.info("setting bool");isBouncy=bool;}
     @Shadow abstract public void onLanding();
     @Shadow public float fallDistance;
     @Shadow public boolean noClip;

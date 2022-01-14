@@ -22,12 +22,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 
 @Mixin(CowEntity.class)
-public abstract class CowEntityMixin extends AnimalEntity implements EntityExtension {
+public abstract class CowEntityMixin extends AnimalEntity implements EntityExtension{
     protected CowEntityMixin(EntityType<? extends AnimalEntity> entityType, World world) {
         super(entityType, world);
     }
 
-    public boolean isBouncy(){return true;}
+    public boolean isBouncy=true;
     /**
     @Override
     public boolean handleFallDamage(float fallDistance, float damageMultiplier, DamageSource damageSource) {
