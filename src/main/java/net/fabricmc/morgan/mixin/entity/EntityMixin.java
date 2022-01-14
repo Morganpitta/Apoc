@@ -1,6 +1,5 @@
 package net.fabricmc.morgan.mixin.entity;
 
-import jdk.jfr.SettingDefinition;
 import net.fabricmc.morgan.ExampleMod;
 import net.fabricmc.morgan.entity.EntityExtension;
 import net.fabricmc.morgan.world.entity.Bounciness;
@@ -8,33 +7,32 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MovementType;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.server.command.CommandOutput;
-import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.tag.BlockTags;
-import net.minecraft.text.Text;
 import net.minecraft.util.Nameable;
 import net.minecraft.util.math.*;
 import net.minecraft.world.World;
 import net.minecraft.world.entity.EntityLike;
 import net.minecraft.world.event.GameEvent;
-import net.minecraft.world.event.listener.EntityGameEventHandler;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 
-import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutput, EntityExtension {
 
-    public boolean isBouncy = false;
-    public void setBouncy(boolean bool){ExampleMod.LOGGER.info("setting bool");isBouncy=bool;}
+
+
+    public boolean isBouncy=false;
+    public void setBouncy(boolean bool){ExampleMod.LOGGER.info("setting bool");this.isBouncy=bool;}
     @Shadow abstract public void onLanding();
     @Shadow public float fallDistance;
     @Shadow public boolean noClip;
@@ -131,6 +129,10 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
     @Shadow abstract public List<Entity> getPassengerList();
 
     @Shadow abstract public boolean handleFallDamage(float fallDistance, float damageMultiplier, DamageSource damageSource);
+
+    public EntityMixin(EntityType<?> type, World world) {
+
+    }
 
     @Overwrite
     public void move(MovementType movementType, Vec3d movement) {
