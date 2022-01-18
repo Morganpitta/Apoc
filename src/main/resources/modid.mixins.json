@@ -10,8 +10,11 @@
     "entity.passive.CowEntityMixin",
     "entity.EntityMixin",
     "entity.LivingEntityMixin",
+    "entity.projectile.thrown.EggEntityMixin",
     "block.FluidBlockMixin",
-    "entity.projectile.thrown.EggEntityMixin"
+    "block.SlimeBlockMixin",
+    "client.network.ClientPlayerEntityMixin",
+    "server.network.ServerPlayerEntityMixin"
   ],
   "client": [
     "ExampleMixin"

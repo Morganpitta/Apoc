@@ -31,7 +31,13 @@ public abstract class CowEntityMixin extends AnimalEntity{
         ((EntityExtension)this).setBouncy(true);
     }
 
-
+    @Override
+    public void tick(){
+        super.tick();
+        if (!((EntityExtension)this).getBouncy()) {
+            ((EntityExtension) this).setBouncy(true);
+        }
+    }
 
     /**
     @Override

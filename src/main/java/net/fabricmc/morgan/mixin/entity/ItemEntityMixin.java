@@ -2,6 +2,7 @@ package net.fabricmc.morgan.mixin.entity;
 
 import net.fabricmc.morgan.entity.effect.StatusEffects;
 import net.fabricmc.morgan.entity.player.PlayerEntityExtension;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
@@ -54,14 +55,16 @@ public abstract class ItemEntityMixin extends Entity {
             int i = itemStack.getCount();
             if ((this.owner == null || this.owner.equals(player.getUuid())) && player.getInventory().insertStack(itemStack)) {
                 player.sendPickup(this, i);
-                ((PlayerEntityExtension)player).SwitchJump();
-                AnimalEntity Goat = EntityType.GOAT.spawn((ServerWorld) world, null, Text.of(player.getEntityName() +"'s Goat"), player, new BlockPos(player.getX(),player.getY()+1,player.getZ()), SpawnReason.JOCKEY,false,false);
-                Goat.shouldRenderName();
-                Goat.setYaw(player.getYaw());
-                Goat.setPitch(player.getPitch());
-                Goat.addStatusEffect(new StatusEffectInstance(StatusEffects.GOAT,100000,4));
-                player.giveItemStack(new ItemStack(Items.BEDROCK));
-                player.setYaw(getYaw()+i);
+                ((PlayerEntityExtension) player).SwitchJump();
+
+                for (int x=i;x>0;x--) {
+                    AnimalEntity Goat = EntityType.GOAT.spawn((ServerWorld) world, null, Text.of(player.getEntityName() + "'s Goat"), player, new BlockPos(player.getX(), player.getY() + 1, player.getZ()), SpawnReason.JOCKEY, false, false);
+                    Goat.shouldRenderName();
+                    Goat.setYaw(player.getYaw());
+                    Goat.setPitch(player.getPitch());
+                    Goat.addStatusEffect(new StatusEffectInstance(StatusEffects.GOAT, 100000, 4));
+                    player.giveItemStack(new ItemStack(Items.BEDROCK));
+                }
                 if (itemStack.isEmpty()) {
                     this.discard();
                     itemStack.setCount(i);

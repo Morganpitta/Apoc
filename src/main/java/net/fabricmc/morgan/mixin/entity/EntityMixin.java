@@ -1,5 +1,8 @@
 package net.fabricmc.morgan.mixin.entity;
 
+
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.morgan.ExampleMod;
 import net.fabricmc.morgan.entity.EntityExtension;
 import net.fabricmc.morgan.world.entity.Bounciness;
@@ -10,8 +13,13 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MovementType;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.command.CommandOutput;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.tag.BlockTags;
+import net.minecraft.text.Text;
 import net.minecraft.util.Nameable;
 import net.minecraft.util.math.*;
 import net.minecraft.world.World;
@@ -23,6 +31,8 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
 
@@ -32,7 +42,15 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
 
 
     public boolean isBouncy=false;
-    public void setBouncy(boolean bool){ExampleMod.LOGGER.info("setting bool");this.isBouncy=bool;}
+    public void setBouncy(boolean bool){
+        this.isBouncy=bool;
+        if (this.isPlayer()&&!this.world.isClient()&&((ServerPlayerEntity)(Object)this).networkHandler!=null) {
+            PacketByteBuf buf = PacketByteBufs.create();
+            buf.writeBoolean(bool);
+            ServerPlayNetworking.send((ServerPlayerEntity) (Object) this, ExampleMod.BOUNCY_PACKET_ID, buf);
+        }
+    }
+    public boolean getBouncy(){return this.isBouncy;}
     @Shadow abstract public void onLanding();
     @Shadow public float fallDistance;
     @Shadow public boolean noClip;
@@ -134,6 +152,15 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
 
     }
 
+    @Inject(method = "writeNbt",at = @At("HEAD"))
+    public void writeNbt(NbtCompound nbt, CallbackInfoReturnable info ) {
+        nbt.putBoolean("IsBouncy", this.isBouncy);
+    }
+    @Inject(method = "readNbt",at = @At("HEAD"))
+    public void readNbt(NbtCompound nbt,CallbackInfo info ) {
+        this.setBouncy(nbt.getBoolean("IsBouncy"));
+    }
+
     @Overwrite
     public void move(MovementType movementType, Vec3d movement) {
         if (this.noClip) {
@@ -179,7 +206,7 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
             } else {
                 Vec3d vec3d2 = this.getVelocity();
                 if (movement.x != vec3d.x) {
-                    if (isBouncy)
+                    if (getBouncy())
                     {
                         this.setVelocity(-vec3d.x*Bounciness.Bounciness, vec3d2.y, vec3d2.z);
                     }
@@ -189,7 +216,7 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
                 }
 
                 if (movement.z != vec3d.z) {
-                    if (isBouncy)
+                    if (getBouncy())
                     {
                         this.setVelocity(vec3d.x, vec3d2.y, -vec3d2.z*Bounciness.Bounciness);
                     }
@@ -204,10 +231,15 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
                 }
 
                 if (this.onGround && !this.bypassesSteppingEffects()) {
-                    if (isBouncy&&vec3d.y<0.0D)
+                    if (getBouncy()&&vec3d.y<0.0D)
                     {
                         this.handleFallDamage(fallDistance, 0.0F, DamageSource.FALL);
-                        this.setVelocity(vec3d.x, -vec3d2.y*(Bounciness.Bounciness*1.1), vec3d.z);
+                        if (this.isPlayer()) {
+                                this.setVelocity(vec3d.x, -vec3d2.y * Bounciness.Bounciness, vec3d.z);
+                        }
+                        else {
+                            this.setVelocity(vec3d.x, -vec3d2.y * Bounciness.Bounciness, vec3d.z);
+                        }
                     }
                     block.onSteppedOn(this.world, blockPos, blockState, (Entity) (Object) this);
                 }

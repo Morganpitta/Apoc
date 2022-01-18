@@ -3,6 +3,7 @@ package net.fabricmc.morgan.mixin.entity;
 import com.google.common.base.Objects;
 import net.fabricmc.morgan.ExampleMod;
 import net.fabricmc.morgan.entity.EntityExtension;
+import net.fabricmc.morgan.entity.player.PlayerEntityExtension;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
@@ -10,6 +11,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectUtil;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleTypes;
@@ -17,6 +19,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.tag.FluidTags;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -31,12 +34,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.Optional;
 
 @Mixin(LivingEntity.class)
-public abstract class LivingEntityMixin extends Entity {
+public abstract class LivingEntityMixin extends Entity implements EntityExtension{
     public LivingEntityMixin(EntityType<?> type, World world) {
         super(type, world);
     }
 
-    public boolean isBouncy;
 
     @Shadow public float lastHandSwingProgress;
     @Shadow public float handSwingProgress;
@@ -73,11 +75,14 @@ public abstract class LivingEntityMixin extends Entity {
     @Shadow float headYaw;
     @Shadow float prevHeadYaw;
 
+    @Shadow protected abstract float getJumpVelocity();
+
+    @Shadow public abstract double getJumpBoostVelocityModifier();
 
     @Overwrite
     public boolean handleFallDamage(float fallDistance, float damageMultiplier, DamageSource damageSource){
         boolean bl = super.handleFallDamage(fallDistance, damageMultiplier, damageSource);
-        if(this.isBouncy){
+        if(getBouncy()){
             return false;
         }
         else {
@@ -204,6 +209,30 @@ public abstract class LivingEntityMixin extends Entity {
         this.prevYaw = this.getYaw();
         this.prevPitch = this.getPitch();
         this.world.getProfiler().pop();
+    }
+
+    @Overwrite
+    public void jump() {
+        double d = (double)this.getJumpVelocity() + this.getJumpBoostVelocityModifier();
+        Vec3d vec3d = this.getVelocity();
+        if (this.isPlayer()) {
+            if (((PlayerEntityExtension) this).getJump()) {
+                this.setVelocity(vec3d.x, d, vec3d.z);
+                if (this.isSprinting()) {
+                    float f = this.getYaw() * 0.017453292F;
+                    this.setVelocity(this.getVelocity().add((double) (-MathHelper.sin(f) * 0.2F), 0.0D, (double) (MathHelper.cos(f) * 0.2F)));
+                }
+            }
+        }
+        else {
+            this.setVelocity(vec3d.x, d, vec3d.z);
+            if (this.isSprinting()) {
+                float f = this.getYaw() * 0.017453292F;
+                this.setVelocity(this.getVelocity().add((double) (-MathHelper.sin(f) * 0.2F), 0.0D, (double) (MathHelper.cos(f) * 0.2F)));
+            }
+        }
+
+        this.velocityDirty = true;
     }
 
 }

@@ -10,6 +10,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Either;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.morgan.ExampleMod;
 import net.fabricmc.morgan.entity.EntityExtension;
 import net.fabricmc.morgan.entity.player.PlayerEntityExtension;
@@ -51,6 +53,7 @@ import net.minecraft.inventory.StackReference;
 import net.minecraft.item.*;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
@@ -94,7 +97,16 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
     }
     public int SleepSheep = 0;
     public boolean CanJump=true;
-    public boolean isBouncy(){return false;}
+    public boolean getJump() {return this.CanJump;}
+    public void setJump(boolean bool) {
+        this.CanJump=bool;
+        if (!this.world.isClient()) {
+            PacketByteBuf buf = PacketByteBufs.create();
+            buf.writeBoolean(bool);
+            ServerPlayNetworking.send((ServerPlayerEntity) (Object) this, ExampleMod.CAN_JUMP_PACKET_ID, buf);
+        }
+    }
+    public int Goats = 0;
     @Shadow protected HungerManager hungerManager = new HungerManager();
     @Shadow private final PlayerAbilities abilities = new PlayerAbilities();
     @Shadow public void incrementStat(Identifier stat) {this.incrementStat(Stats.CUSTOM.getOrCreateStat(stat));}
@@ -144,29 +156,25 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
 
     @Overwrite
     public void jump() {
-        //this.sendMessage(Text.of(this+" is trying to jump. CanJump:"+this.CanJump), false);
-        if (this.CanJump) {
-            //this.sendMessage(Text.of("jumped"), false);
-            super.jump();
-            this.incrementStat(Stats.JUMP);
-            if (this.isSprinting()) {
-                this.addExhaustion(0.2F);
-            } else {
-                this.addExhaustion(0.05F);
-            }
-        }
+                super.jump();
+                this.incrementStat(Stats.JUMP);
+                if (this.isSprinting()) {
+                    this.addExhaustion(0.2F);
+                } else {
+                    this.addExhaustion(0.05F);
+                }
 
     }
 
     @Override
     public void SwitchJump()
     {
-        if (this.CanJump) {
-            this.CanJump = false;
+        if (getJump()) {
+            this.setJump(false);
         } else {
-            this.CanJump = true;
+            this.setJump(true);
         }
-        //this.sendMessage(Text.of("setting can jump to: "+this.CanJump+ " for: "+this), false);
+        //ExampleMod.LOGGER.info(String.valueOf(Text.of("setting can jump to: "+this.CanJump+ " for: "+this)), false);
     }
 
 }

@@ -8,8 +8,11 @@ import net.fabricmc.morgan.ExampleMod;
 import net.fabricmc.morgan.entity.EntityExtension;
 import net.fabricmc.morgan.mixin.entity.EntityMixin;
 import net.minecraft.command.argument.EntityArgumentType;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 
 import java.util.Collection;
@@ -26,7 +29,7 @@ public class BouncyCommand {
     }
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        dispatcher.register( CommandManager.literal("bouncy").requires((source) -> source.hasPermissionLevel(2))
+        dispatcher.register( CommandManager.literal("bouncy")
                 .then(CommandManager.argument("targets", EntityArgumentType.entities())
                         .then(CommandManager.literal("true")
                                 .executes(context -> execute(context.getSource(), EntityArgumentType.getEntities(context, "targets"),true)))
@@ -43,11 +46,26 @@ public class BouncyCommand {
 
         while(var2.hasNext()) {
             net.minecraft.entity.Entity entity = (net.minecraft.entity.Entity)var2.next();
-            ((EntityExtension)entity).setBouncy(bool);
+
+                ((EntityExtension) entity).setBouncy(bool);
         }
 
-        source.sendFeedback(new TranslatableText("commands.bouncy.success", new Object[]{targets},new boolean[]{bool}),false);
+        String temp;
 
+        if (bool){
+            temp = "bouncy";
+        }
+        else {
+            temp = "not bouncy";
+        }
+
+        Object feedback = temp;
+
+        if (targets.size() == 1) {
+            source.sendFeedback(new TranslatableText("commands.bouncy.success.single", new Object[]{targets.iterator().next().getDisplayName(),feedback}), false);
+        } else {
+            source.sendFeedback(new TranslatableText("commands.bouncy.success.multiple",new Object[]{targets.size(),feedback}), false);
+        }
 
         return targets.size();
     }
