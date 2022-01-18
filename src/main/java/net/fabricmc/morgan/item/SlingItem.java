@@ -38,7 +38,7 @@ public class SlingItem extends Item implements Vanishable {
     public static final float field_30928 = 2.5F;
 
     public UseAction getUseAction(ItemStack stack) {
-        return UseAction.SPEAR;
+        return UseAction.BOW;
     }
 
     public int getMaxUseTime(ItemStack stack) {
@@ -55,11 +55,12 @@ public class SlingItem extends Item implements Vanishable {
             float h = -MathHelper.sin(f * 0.017453292F);
             float k = MathHelper.cos(tridentEntity * 0.017453292F) * MathHelper.cos(f * 0.017453292F);
             float l = MathHelper.sqrt(g * g + h * h + k * k);
-            float m = (float) i/10;
+            float m = (float) (i >40? 40:i)/10;
             g *= m / l;
             h *= m / l;
             k *= m / l;
             playerEntity.addVelocity((double) g, (double) h, (double) k);
+            playerEntity.addExhaustion(2);
             if (playerEntity.isOnGround()) {
                 float n = 1.1999999F;
                 playerEntity.move(MovementType.SELF, new Vec3d(0.0D, 1.1999999284744263D, 0.0D));
@@ -70,12 +71,9 @@ public class SlingItem extends Item implements Vanishable {
 
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         ItemStack itemStack = user.getStackInHand(hand);
-        if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
-            return TypedActionResult.fail(itemStack);
-        } else {
-            user.setCurrentHand(hand);
-            return TypedActionResult.consume(itemStack);
-        }
+        user.getItemCooldownManager().set(this, 100);
+        user.setCurrentHand(hand);
+        return TypedActionResult.consume(itemStack);
     }
 }
 
