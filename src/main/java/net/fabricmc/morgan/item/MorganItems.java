@@ -14,6 +14,7 @@ import java.util.Optional;
 
 public class MorganItems {
     public static final Item MEAT_BLOCK;
+    public static final Item SLING_ITEM;
 
     public MorganItems() {
     }
@@ -64,7 +65,7 @@ public class MorganItems {
     }
 
     private static Item register(String id, Item item) {
-        return register(new Identifier(id), item);
+        return register(new Identifier("morgan",id), item);
     }
 
     private static Item register(Identifier id, Item item) {
@@ -77,5 +78,6 @@ public class MorganItems {
 
     static {
         MEAT_BLOCK = register(MorganBlocks.MEAT_BLOCK, ItemGroup.FOOD);
+        SLING_ITEM = register("sling",(Item) (new SlingItem()));
     }
 }
