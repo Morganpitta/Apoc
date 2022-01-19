@@ -4,17 +4,18 @@ import net.fabricmc.morgan.block.MeatBlock;
 import net.fabricmc.morgan.block.MorganBlocks;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.item.*;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
+import org.lwjgl.opengl.GL;
 
 import java.util.Optional;
 
 public class MorganItems {
     public static final Item MEAT_BLOCK;
     public static final Item SLING_ITEM;
+    public static final Item GLASSES;
 
     public MorganItems() {
     }
@@ -79,5 +80,6 @@ public class MorganItems {
     static {
         MEAT_BLOCK = register(MorganBlocks.MEAT_BLOCK, ItemGroup.FOOD);
         SLING_ITEM = register("sling",(Item) (new SlingItem()));
+        GLASSES = register((String)"glasses", (Item)(new ArmorItem(MorganArmorMaterials.IRON_GLASSES, EquipmentSlot.HEAD, (new Item.Settings()).group(ItemGroup.TOOLS))));
     }
 }

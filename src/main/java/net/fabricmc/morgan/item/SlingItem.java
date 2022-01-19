@@ -55,7 +55,7 @@ public class SlingItem extends Item implements Vanishable {
             float h = -MathHelper.sin(f * 0.017453292F);
             float k = MathHelper.cos(tridentEntity * 0.017453292F) * MathHelper.cos(f * 0.017453292F);
             float l = MathHelper.sqrt(g * g + h * h + k * k);
-            float m = (float) (i >40? 40:i)/10;
+            float m = (float) (i >20? 20:i)/5;
             g *= m / l;
             h *= m / l;
             k *= m / l;
@@ -71,7 +71,7 @@ public class SlingItem extends Item implements Vanishable {
 
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         ItemStack itemStack = user.getStackInHand(hand);
-        user.getItemCooldownManager().set(this, 100);
+        user.getItemCooldownManager().set(this, 80);
         user.setCurrentHand(hand);
         return TypedActionResult.consume(itemStack);
     }
