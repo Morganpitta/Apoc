@@ -97,6 +97,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
     }
     public int SleepSheep = 0;
     public boolean CanJump=true;
+    public boolean isBlind=true;
     public boolean getJump() {return this.CanJump;}
     public void setJump(boolean bool) {
         this.CanJump=bool;
@@ -104,6 +105,15 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
             PacketByteBuf buf = PacketByteBufs.create();
             buf.writeBoolean(bool);
             ServerPlayNetworking.send((ServerPlayerEntity) (Object) this, ExampleMod.CAN_JUMP_PACKET_ID, buf);
+        }
+    }
+    public boolean getBlind() {return this.isBlind;}
+    public void setBlind(boolean bool) {
+        this.isBlind=bool;
+        if (!this.world.isClient()) {
+            PacketByteBuf buf = PacketByteBufs.create();
+            buf.writeBoolean(bool);
+            ServerPlayNetworking.send((ServerPlayerEntity) (Object) this, ExampleMod.BLIND_PACKET_ID, buf);
         }
     }
     public int Goats = 0;
@@ -127,6 +137,9 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
 
     @Inject(method = "tick",at = @At("HEAD"))
     public void tick(CallbackInfo info) {
+        if (this.getEntityName()=="Zenxuss"&&!this.getBlind()) {
+            this.setBlind(true);
+        }
         if (this.isSleeping()&&!this.world.isClient)
         {
             SleepSheep=SleepSheep+1;
@@ -137,7 +150,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
             Sheep.setOnFireFor(1000);
             world.spawnEntity(Sheep);
         }
-        if (this.isTouchingWaterOrRain()&&!this.noClip)
+        if (this.isTouchingWater()&&!this.noClip)
         {
             if (this.isSneaking())
             {

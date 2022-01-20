@@ -52,6 +52,15 @@ public class ExampleModClient implements ClientModInitializer {
             });
         });
 
+        //Blind stuff
+        ClientPlayNetworking.registerGlobalReceiver(ExampleMod.BOUNCY_PACKET_ID, (client, handler, buf, responseSender) -> {
+            boolean Bouncy = buf.readBoolean();
+            client.execute(() -> {
+                // Everything in this lambda is run on the render thread
+                ((PlayerEntityExtension)client.player).setBlind(Bouncy);
+            });
+        });
+
         //makes chlorine block seethrough
         BlockRenderLayerMap.INSTANCE.putBlock(MorganBlocks.CHLORINE_GAS, RenderLayer.getTranslucent());
 
