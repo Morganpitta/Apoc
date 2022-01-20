@@ -63,7 +63,7 @@ public class ExampleModClient implements ClientModInitializer {
 
         //makes chlorine block seethrough
         BlockRenderLayerMap.INSTANCE.putBlock(MorganBlocks.CHLORINE_GAS, RenderLayer.getTranslucent());
-
+        BlockRenderLayerMap.INSTANCE.putBlock(MorganBlocks.MEAT_BLOCK,RenderLayer.getTranslucent());
         // ...
     }
 }

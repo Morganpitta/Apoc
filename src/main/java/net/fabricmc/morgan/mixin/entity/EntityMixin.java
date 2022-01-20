@@ -4,6 +4,7 @@ package net.fabricmc.morgan.mixin.entity;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.morgan.ExampleMod;
+import net.fabricmc.morgan.block.MeatBlock;
 import net.fabricmc.morgan.entity.EntityExtension;
 import net.fabricmc.morgan.world.entity.Bounciness;
 import net.minecraft.block.Block;

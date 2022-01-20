@@ -12,11 +12,17 @@ import net.minecraft.world.World;
 
 public class MeatBlock extends Block {
     public MeatBlock() {
-        super(AbstractBlock.Settings.of(Material.CAKE).breakInstantly());
+        super(AbstractBlock.Settings.of(Material.CAKE).breakInstantly().nonOpaque());
     }
 
     public void onSteppedOn(World world, BlockPos pos, BlockState state, Entity entity) {
         super.onSteppedOn(world, pos, state, entity);
+        if(entity.isPlayer()){
+            ((PlayerEntity) entity).getHungerManager().add(1,1);
+        }
+    }
+
+    public void onSteppedOnWithCrouch(World world, BlockPos pos, BlockState state, Entity entity){
         if(entity.isPlayer()){
             ((PlayerEntity) entity).getHungerManager().add(1,1);
         }
