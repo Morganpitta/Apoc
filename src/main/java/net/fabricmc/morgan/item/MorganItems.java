@@ -16,6 +16,7 @@ public class MorganItems {
     public static final Item MEAT_BLOCK;
     public static final Item SLING_ITEM;
     public static final Item GLASSES;
+    public static final Item WET_SHOES;
 
     public MorganItems() {
     }
@@ -80,6 +81,7 @@ public class MorganItems {
     static {
         MEAT_BLOCK = register(MorganBlocks.MEAT_BLOCK, ItemGroup.FOOD);
         SLING_ITEM = register("sling",(Item) (new SlingItem()));
-        GLASSES = register((String)"glasses", (Item)(new ArmorItem(MorganArmorMaterials.IRON_GLASSES, EquipmentSlot.HEAD, (new Item.Settings()).group(ItemGroup.TOOLS))));
+        GLASSES = register((String)"glasses", (Item)(new ArmorItem(MorganArmorMaterials.CUSTOM_IRON_MATERIAL, EquipmentSlot.HEAD, (new Item.Settings()).group(ItemGroup.TOOLS))));
+        WET_SHOES = register((String)"wet_shoes", (Item)(new ArmorItem(MorganArmorMaterials.CUSTOM_IRON_MATERIAL, EquipmentSlot.FEET, (new Item.Settings()).group(ItemGroup.TOOLS))));
     }
 }

@@ -11,13 +11,13 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Lazy;
 
 public enum MorganArmorMaterials implements ArmorMaterial {
-    IRON_GLASSES("iron_glasses", 15, new int[]{2, 5, 6, 2}, 9, SoundEvents.ITEM_ARMOR_EQUIP_IRON, 0.0F, 0.0F, () -> {
+    CUSTOM_IRON_MATERIAL("custom_iron_material", 15, new int[]{2, 5, 6, 2}, 9, SoundEvents.ITEM_ARMOR_EQUIP_IRON, 0.0F, 0.0F, () -> {
         return Ingredient.ofItems(new ItemConvertible[]{Items.IRON_INGOT});
     }),
-    GOLD_GLASSES("gold_glasses", 7, new int[]{1, 3, 5, 2}, 25, SoundEvents.ITEM_ARMOR_EQUIP_GOLD, 0.0F, 0.0F, () -> {
+    CUSTOM_GOLD_MATERIAL("custom_gold_material", 7, new int[]{1, 3, 5, 2}, 25, SoundEvents.ITEM_ARMOR_EQUIP_GOLD, 0.0F, 0.0F, () -> {
         return Ingredient.ofItems(new ItemConvertible[]{Items.GOLD_INGOT});
     }),
-    NETHERITE_GLASSES("netherite_glasses", 37, new int[]{3, 6, 8, 3}, 15, SoundEvents.ITEM_ARMOR_EQUIP_NETHERITE, 3.0F, 0.1F, () -> {
+    CUSTOM_NETHERITE_MATERIAL("custom_netherite_material", 37, new int[]{3, 6, 8, 3}, 15, SoundEvents.ITEM_ARMOR_EQUIP_NETHERITE, 3.0F, 0.1F, () -> {
         return Ingredient.ofItems(new ItemConvertible[]{Items.NETHERITE_INGOT});
     });
 

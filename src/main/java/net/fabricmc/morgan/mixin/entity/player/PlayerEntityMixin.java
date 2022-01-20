@@ -97,7 +97,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
     }
     public int SleepSheep = 0;
     public boolean CanJump=true;
-    public boolean isBlind=true;
+    public boolean isBlind=false;
     public boolean getJump() {return this.CanJump;}
     public void setJump(boolean bool) {
         this.CanJump=bool;
