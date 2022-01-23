@@ -2,9 +2,11 @@ package net.fabricmc.morgan.mixin.entity;
 
 import net.fabricmc.morgan.entity.effect.StatusEffects;
 import net.fabricmc.morgan.entity.player.PlayerEntityExtension;
-import net.fabricmc.morgan.item.MorganItems;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.entity.*;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.ItemEntity;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
@@ -18,15 +20,11 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.stat.Stats;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.UUID;
 
@@ -42,8 +40,6 @@ public abstract class ItemEntityMixin extends Entity {
     }
     @Shadow @Nullable
     private UUID owner;
-
-    private PlayerEntity target;
 
 
     static {
@@ -78,29 +74,6 @@ public abstract class ItemEntityMixin extends Entity {
                 player.triggerItemPickedUpByEntityCriteria((ItemEntity) (Entity) this);
             }
 
-        }
-    }
-
-
-    private void expensiveUpdate() {
-        if (this.target == null || this.target.squaredDistanceTo(this) > 64.0D) {
-            this.target = this.world.getClosestPlayer(this, 8.0D);
-        }
-    }
-
-    @Inject(method = "tick",at=@At("HEAD"))
-    public void tick(CallbackInfo info){
-        if (this.target != null && ((this.target.isDead()) ||!(this.target.getEquippedStack(EquipmentSlot.OFFHAND).isOf(MorganItems.ITEM_MAGNET) ||this.target.getEquippedStack(EquipmentSlot.MAINHAND).isOf(MorganItems.ITEM_MAGNET)))) {
-            this.target = null;
-        }
-
-        if (this.target != null) {
-            Vec3d vec3d = new Vec3d(this.target.getX() - this.getX(), this.target.getY() + (double)this.target.getStandingEyeHeight() / 2.0D - this.getY(), this.target.getZ() - this.getZ());
-            double d = vec3d.lengthSquared();
-            if (d < 64.0D) {
-                double e = 1.0D - Math.sqrt(d) / 8.0D;
-                this.setVelocity(this.getVelocity().add(vec3d.normalize().multiply(e * e * 0.1D)));
-            }
         }
     }
 }
