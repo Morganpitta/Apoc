@@ -11,12 +11,14 @@ import net.fabricmc.morgan.ExampleMod;
 import net.fabricmc.morgan.entity.EntityExtension;
 import net.fabricmc.morgan.entity.player.PlayerEntityExtension;
 import net.fabricmc.morgan.item.MorganItems;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.*;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.particle.ParticleEffect;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.stat.Stat;
@@ -24,7 +26,9 @@ import net.minecraft.stat.Stats;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.TypeFilter;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -32,6 +36,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.Iterator;
+import java.util.List;
 
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEntityExtension, EntityExtension {
@@ -109,7 +116,20 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
             }
         }
         if (this.getStackInHand(Hand.MAIN_HAND).isOf(MorganItems.ITEM_MAGNET)||this.getStackInHand(Hand.OFF_HAND).isOf(MorganItems.ITEM_MAGNET)){
-            this.world.getEntitiesByClass( ItemEntity)
+            List list = this.world.getEntitiesByType(TypeFilter.instanceOf(ItemEntity.class),this.getBoundingBox().expand(10D),Entity::isAlive);
+            Iterator var1 = list.iterator();
+
+            while(var1.hasNext()) {
+                ItemEntity item = (ItemEntity)var1.next();
+                Vec3d vec3d = new Vec3d(this.getX() - item.getX(), this.getY() + (double)this.getStandingEyeHeight() / 2.0D - item.getY(), this.getZ() - item.getZ());
+                double d = vec3d.lengthSquared();
+                if (d < 128.0D) {
+                    ((ServerPlayerEntity)(Object)this).getWorld().spawnParticles(this,)
+                    double e = 1.0D - Math.sqrt(d) / 8.0D;
+                    e=e*4;
+                    item.setVelocity(item.getVelocity().add(vec3d.normalize().multiply(e * e * 0.1D)));
+                }
+            }
         }
 
     }
@@ -123,7 +143,6 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
                 } else {
                     this.addExhaustion(0.05F);
                 }
-
     }
 
     @Override

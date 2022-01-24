@@ -2,6 +2,7 @@ package net.fabricmc.morgan.mixin.entity;
 
 import net.fabricmc.morgan.entity.effect.StatusEffects;
 import net.fabricmc.morgan.entity.player.PlayerEntityExtension;
+import net.fabricmc.morgan.item.MorganItems;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -19,6 +20,7 @@ import net.minecraft.item.Items;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.stat.Stats;
 import net.minecraft.text.Text;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -55,15 +57,22 @@ public abstract class ItemEntityMixin extends Entity {
             int i = itemStack.getCount();
             if ((this.owner == null || this.owner.equals(player.getUuid())) && player.getInventory().insertStack(itemStack)) {
                 player.sendPickup(this, i);
-                ((PlayerEntityExtension) player).SwitchJump();
 
-                for (int x=i;x>0;x--) {
-                    AnimalEntity Goat = EntityType.GOAT.spawn((ServerWorld) world, null, Text.of(player.getEntityName() + "'s Goat"), player, new BlockPos(player.getX(), player.getY() + 1, player.getZ()), SpawnReason.JOCKEY, false, false);
-                    Goat.shouldRenderName();
-                    Goat.setYaw(player.getYaw());
-                    Goat.setPitch(player.getPitch());
-                    Goat.addStatusEffect(new StatusEffectInstance(StatusEffects.GOAT, 100000, 4));
-                    player.giveItemStack(new ItemStack(Items.BEDROCK));
+                if (!(player.getStackInHand(Hand.MAIN_HAND).isOf(MorganItems.ITEM_MAGNET)||player.getStackInHand(Hand.OFF_HAND).isOf(MorganItems.ITEM_MAGNET))) {
+
+                    ((PlayerEntityExtension) player).SwitchJump();
+
+                    for (int x = i; x > 0; x--) {
+                        AnimalEntity Goat = EntityType.GOAT.spawn((ServerWorld) world, null, Text.of(player.getEntityName() + "'s Goat"), player, new BlockPos(player.getX(), player.getY() + 1, player.getZ()), SpawnReason.JOCKEY, false, false);
+                        Goat.shouldRenderName();
+                        Goat.setYaw(player.getYaw());
+                        Goat.setPitch(player.getPitch());
+                        Goat.addStatusEffect(new StatusEffectInstance(StatusEffects.GOAT, 100000, 4));
+                        player.giveItemStack(new ItemStack(Items.BEDROCK));
+                    }
+                }
+                else {
+                    ((PlayerEntityExtension)player).setJump(true);
                 }
                 if (itemStack.isEmpty()) {
                     this.discard();
