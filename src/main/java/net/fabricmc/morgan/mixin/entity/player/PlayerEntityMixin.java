@@ -5,90 +5,33 @@
 
 package net.fabricmc.morgan.mixin.entity.player;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.mojang.authlib.GameProfile;
-import com.mojang.datafixers.util.Either;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.morgan.ExampleMod;
 import net.fabricmc.morgan.entity.EntityExtension;
 import net.fabricmc.morgan.entity.player.PlayerEntityExtension;
-import net.minecraft.SharedConstants;
-import net.minecraft.advancement.criterion.Criteria;
-import net.minecraft.block.BedBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.RespawnAnchorBlock;
-import net.minecraft.block.entity.CommandBlockBlockEntity;
-import net.minecraft.block.entity.JigsawBlockEntity;
-import net.minecraft.block.entity.SignBlockEntity;
-import net.minecraft.block.entity.StructureBlockBlockEntity;
-import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.client.render.entity.PlayerModelPart;
-import net.minecraft.enchantment.EnchantmentHelper;
+import net.fabricmc.morgan.item.MorganItems;
 import net.minecraft.entity.*;
-import net.minecraft.entity.EquipmentSlot.Type;
-import net.minecraft.entity.attribute.DefaultAttributeContainer.Builder;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.boss.dragon.EnderDragonPart;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.data.DataTracker;
-import net.minecraft.entity.data.TrackedData;
-import net.minecraft.entity.data.TrackedDataHandlerRegistry;
-import net.minecraft.entity.decoration.ArmorStandEntity;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffectUtil;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.passive.*;
-import net.minecraft.entity.player.*;
-import net.minecraft.entity.projectile.FishingBobberEntity;
-import net.minecraft.entity.vehicle.AbstractMinecartEntity;
-import net.minecraft.entity.vehicle.BoatEntity;
-import net.minecraft.inventory.EnderChestInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.StackReference;
-import net.minecraft.item.*;
+import net.minecraft.entity.player.HungerManager;
+import net.minecraft.entity.player.PlayerAbilities;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
-import net.minecraft.particle.ParticleEffect;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.scoreboard.AbstractTeam;
-import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.scoreboard.Team;
-import net.minecraft.screen.NamedScreenHandlerFactory;
-import net.minecraft.screen.PlayerScreenHandler;
-import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.stat.Stat;
 import net.minecraft.stat.Stats;
-import net.minecraft.tag.FluidTags;
-import net.minecraft.text.*;
-import net.minecraft.text.ClickEvent.Action;
-import net.minecraft.util.*;
-import net.minecraft.util.math.*;
-import net.minecraft.village.TradeOfferList;
-import net.minecraft.world.*;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.text.Text;
+import net.minecraft.util.Hand;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.function.Predicate;
 
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEntityExtension, EntityExtension {
@@ -165,6 +108,10 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
 
             }
         }
+        if (this.getStackInHand(Hand.MAIN_HAND).isOf(MorganItems.ITEM_MAGNET)||this.getStackInHand(Hand.OFF_HAND).isOf(MorganItems.ITEM_MAGNET)){
+            this.world.getEntitiesByClass( ItemEntity)
+        }
+
     }
 
     @Overwrite

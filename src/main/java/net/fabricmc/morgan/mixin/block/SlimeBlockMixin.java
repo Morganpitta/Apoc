@@ -1,6 +1,5 @@
 package net.fabricmc.morgan.mixin.block;
 
-import net.fabricmc.morgan.ExampleMod;
 import net.fabricmc.morgan.entity.EntityExtension;
 import net.fabricmc.morgan.world.entity.Bounciness;
 import net.minecraft.block.SlimeBlock;
@@ -17,6 +16,10 @@ public abstract class SlimeBlockMixin extends TransparentBlock {
         super(settings);
     }
 
+    /**
+     * @param entity
+     * entity
+     */
     @Overwrite
     private void bounce(Entity entity) {
         Vec3d vec3d = entity.getVelocity();
