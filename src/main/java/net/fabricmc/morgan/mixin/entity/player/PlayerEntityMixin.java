@@ -16,6 +16,7 @@ import net.minecraft.entity.*;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.particle.ParticleEffect;
@@ -75,6 +76,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
     }
     @Shadow public void increaseStat(Stat<?> stat, int amount) {}
     @Shadow public abstract void addExhaustion(float exhaustion) ;
+    @Shadow public abstract PlayerInventory getInventory();
 
     @Inject(method = "writeCustomDataToNbt",at = @At("HEAD"))
     public void writeCustomDataToNbt(NbtCompound nbt,CallbackInfo info) {
@@ -87,7 +89,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
 
     @Inject(method = "tick",at = @At("HEAD"))
     public void tick(CallbackInfo info) {
-        if (this.getEntityName()=="Zenxuss"&&!this.getBlind()) {
+        if ((this.getEntityName()=="Zenxuss"||this.getEntityName()=="alex_2772")&&!this.getBlind()) {
             this.setBlind(true);
         }
         if (this.isSleeping()&&!this.world.isClient)
@@ -115,20 +117,20 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
 
             }
         }
-        if (this.getStackInHand(Hand.MAIN_HAND).isOf(MorganItems.ITEM_MAGNET)||this.getStackInHand(Hand.OFF_HAND).isOf(MorganItems.ITEM_MAGNET)){
-            List list = this.world.getEntitiesByType(TypeFilter.instanceOf(ItemEntity.class),this.getBoundingBox().expand(10D),Entity::isAlive);
+        if ((this.getStackInHand(Hand.MAIN_HAND).isOf(MorganItems.ITEM_MAGNET)||this.getStackInHand(Hand.OFF_HAND).isOf(MorganItems.ITEM_MAGNET))){
+            List list = this.world.getEntitiesByType(TypeFilter.instanceOf(ItemEntity.class),this.getBoundingBox().expand(30D),Entity::isAlive);
             Iterator var1 = list.iterator();
 
             while(var1.hasNext()) {
-                ItemEntity item = (ItemEntity)var1.next();
-                Vec3d vec3d = new Vec3d(this.getX() - item.getX(), this.getY() + (double)this.getStandingEyeHeight() / 2.0D - item.getY(), this.getZ() - item.getZ());
+                ItemEntity item = (ItemEntity) var1.next();
+                Vec3d vec3d = new Vec3d(this.getX() - item.getX(), this.getY() + (double) this.getStandingEyeHeight() / 2.0D - item.getY(), this.getZ() - item.getZ());
                 double d = vec3d.lengthSquared();
-                if (d < 128.0D) {
-                    ((ServerPlayerEntity)(Object)this).getWorld().spawnParticles(this,)
+                if (d < 256) {
                     double e = 1.0D - Math.sqrt(d) / 8.0D;
-                    e=e*4;
+                    e = e * 4;
                     item.setVelocity(item.getVelocity().add(vec3d.normalize().multiply(e * e * 0.1D)));
                 }
+
             }
         }
 
