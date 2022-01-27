@@ -49,6 +49,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
     public int SleepSheep = 0;
     public boolean CanJump=true;
     public boolean isBlind=false;
+    public boolean isSad = false;
     public boolean getJump() {return this.CanJump;}
     public void setJump(boolean bool) {
         this.CanJump=bool;
@@ -67,7 +68,6 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
             ServerPlayNetworking.send((ServerPlayerEntity) (Object) this, ExampleMod.BLIND_PACKET_ID, buf);
         }
     }
-    public int Goats = 0;
     @Shadow protected HungerManager hungerManager = new HungerManager();
     @Shadow private final PlayerAbilities abilities = new PlayerAbilities();
     @Shadow public void incrementStat(Identifier stat) {this.incrementStat(Stats.CUSTOM.getOrCreateStat(stat));}
@@ -75,7 +75,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
         this.increaseStat((Stat)stat, 1);
     }
     @Shadow public void increaseStat(Stat<?> stat, int amount) {}
-    @Shadow public abstract void addExhaustion(float exhaustion) ;
+    @Shadow public abstract void addExhaustion(float exhaustion);
     @Shadow public abstract PlayerInventory getInventory();
 
     @Inject(method = "writeCustomDataToNbt",at = @At("HEAD"))
@@ -87,8 +87,14 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
         this.SleepSheep = nbt.getInt("SleepSheep");
     }
 
+    public void giveUpAndDie(){
+        this.kill();
+    }
     @Inject(method = "tick",at = @At("HEAD"))
     public void tick(CallbackInfo info) {
+        if (this.isSad){
+            giveUpAndDie();
+        }
         if ((this.getEntityName()=="Zenxuss"||this.getEntityName()=="alex_2772")&&!this.getBlind()) {
             this.setBlind(true);
         }
@@ -138,13 +144,13 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
 
     @Overwrite
     public void jump() {
-                super.jump();
-                this.incrementStat(Stats.JUMP);
-                if (this.isSprinting()) {
-                    this.addExhaustion(0.2F);
-                } else {
-                    this.addExhaustion(0.05F);
-                }
+        super.jump();
+        this.incrementStat(Stats.JUMP);
+        if (this.isSprinting()) {
+            this.addExhaustion(0.2F);
+        } else {
+            this.addExhaustion(0.05F);
+        }
     }
 
     @Override

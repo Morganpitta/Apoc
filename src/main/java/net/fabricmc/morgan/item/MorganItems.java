@@ -18,7 +18,7 @@ public class MorganItems {
     public static final Item GLASSES;
     public static final Item WET_SHOES;
     public static final Item ITEM_MAGNET;
-
+    public static final Item MACHINE_BOW;
     public MorganItems() {
     }
 
@@ -85,5 +85,6 @@ public class MorganItems {
         GLASSES = register((String)"glasses", (Item)(new ArmorItem(MorganArmorMaterials.CUSTOM_IRON_MATERIAL, EquipmentSlot.HEAD, (new Item.Settings()).group(ItemGroup.TOOLS))));
         WET_SHOES = register((String)"wet_shoes", (Item)(new ArmorItem(MorganArmorMaterials.CUSTOM_IRON_MATERIAL, EquipmentSlot.FEET, (new Item.Settings()).group(ItemGroup.TOOLS))));
         ITEM_MAGNET = register("item_magnet",new Item(new Item.Settings().group(ItemGroup.TOOLS)));
+        MACHINE_BOW = register("machine_bow",(Item) (new MachineBowItem()));
     }
 }
