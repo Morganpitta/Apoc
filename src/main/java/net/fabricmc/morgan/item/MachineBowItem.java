@@ -1,10 +1,13 @@
 package net.fabricmc.morgan.item;
 
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.entity.projectile.PersistentProjectileEntity;
 import net.minecraft.item.*;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
@@ -17,10 +20,12 @@ public class MachineBowItem extends Item {
 
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
+        int ticks = getMaxUseTime(stack) - remainingUseTicks;
         if (!world.isClient) {
             ArrowEntity arrowEntity = new ArrowEntity(world, user);
-            arrowEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0F, 3F, 5.0F);
+            arrowEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0F, 3F, ticks/20);
             world.spawnEntity(arrowEntity);
+            user.setPitch(user.getPitch()+ticks/20);
         }
     }
 

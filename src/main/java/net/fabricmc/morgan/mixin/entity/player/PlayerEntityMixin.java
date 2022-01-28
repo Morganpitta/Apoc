@@ -12,6 +12,7 @@ import net.fabricmc.morgan.entity.EntityExtension;
 import net.fabricmc.morgan.entity.player.PlayerEntityExtension;
 import net.fabricmc.morgan.item.MorganItems;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.render.entity.ExperienceOrbEntityRenderer;
 import net.minecraft.entity.*;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerAbilities;
@@ -129,6 +130,20 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
 
             while(var1.hasNext()) {
                 ItemEntity item = (ItemEntity) var1.next();
+                Vec3d vec3d = new Vec3d(this.getX() - item.getX(), this.getY() + (double) this.getStandingEyeHeight() / 2.0D - item.getY(), this.getZ() - item.getZ());
+                double d = vec3d.lengthSquared();
+                if (d < 256) {
+                    double e = 1.0D - Math.sqrt(d) / 8.0D;
+                    e = e * 4;
+                    item.setVelocity(item.getVelocity().add(vec3d.normalize().multiply(e * e * 0.1D)));
+                }
+
+            }
+            list = this.world.getEntitiesByType(TypeFilter.instanceOf(ExperienceOrbEntity.class),this.getBoundingBox().expand(30D),Entity::isAlive);
+            var1 = list.iterator();
+
+            while(var1.hasNext()) {
+                ExperienceOrbEntity item = (ExperienceOrbEntity) var1.next();
                 Vec3d vec3d = new Vec3d(this.getX() - item.getX(), this.getY() + (double) this.getStandingEyeHeight() / 2.0D - item.getY(), this.getZ() - item.getZ());
                 double d = vec3d.lengthSquared();
                 if (d < 256) {
