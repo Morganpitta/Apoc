@@ -10,9 +10,8 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.morgan.ExampleMod;
 import net.fabricmc.morgan.entity.EntityExtension;
 import net.fabricmc.morgan.entity.player.PlayerEntityExtension;
+import net.fabricmc.morgan.entity.player.PlayerInventoryExtension;
 import net.fabricmc.morgan.item.MorganItems;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.render.entity.ExperienceOrbEntityRenderer;
 import net.minecraft.entity.*;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerAbilities;
@@ -20,7 +19,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.particle.ParticleEffect;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.stat.Stat;
@@ -41,6 +39,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEntityExtension, EntityExtension {
@@ -69,11 +68,12 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
             ServerPlayNetworking.send((ServerPlayerEntity) (Object) this, ExampleMod.BLIND_PACKET_ID, buf);
         }
     }
+
     @Shadow protected HungerManager hungerManager = new HungerManager();
     @Shadow private final PlayerAbilities abilities = new PlayerAbilities();
     @Shadow public void incrementStat(Identifier stat) {this.incrementStat(Stats.CUSTOM.getOrCreateStat(stat));}
     @Shadow  public void incrementStat(Stat<?> stat) {
-        this.increaseStat((Stat)stat, 1);
+        this.increaseStat(stat, 1);
     }
     @Shadow public void increaseStat(Stat<?> stat, int amount) {}
     @Shadow public abstract void addExhaustion(float exhaustion);
@@ -96,7 +96,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
         if (this.isSad){
             giveUpAndDie();
         }
-        if ((this.getEntityName()=="Zenxuss"||this.getEntityName()=="alex_2772")&&!this.getBlind()) {
+        if ((Objects.equals(this.getEntityName(), "Zenxuss") || Objects.equals(this.getEntityName(), "alex_2772"))&&!this.getBlind()) {
             this.setBlind(true);
         }
         if (this.isSleeping()&&!this.world.isClient)
@@ -119,10 +119,11 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
             {
                 this.addVelocity(0,-1,0);
             }
+            /*
             else if (this.isSneaking() && this.jumping)
             {
-
             }
+             */
         }
         if ((this.getStackInHand(Hand.MAIN_HAND).isOf(MorganItems.ITEM_MAGNET)||this.getStackInHand(Hand.OFF_HAND).isOf(MorganItems.ITEM_MAGNET))){
             List list = this.world.getEntitiesByType(TypeFilter.instanceOf(ItemEntity.class),this.getBoundingBox().expand(30D),Entity::isAlive);
@@ -130,14 +131,15 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
 
             while(var1.hasNext()) {
                 ItemEntity item = (ItemEntity) var1.next();
-                Vec3d vec3d = new Vec3d(this.getX() - item.getX(), this.getY() + (double) this.getStandingEyeHeight() / 2.0D - item.getY(), this.getZ() - item.getZ());
-                double d = vec3d.lengthSquared();
-                if (d < 256) {
-                    double e = 1.0D - Math.sqrt(d) / 8.0D;
-                    e = e * 4;
-                    item.setVelocity(item.getVelocity().add(vec3d.normalize().multiply(e * e * 0.1D)));
+                if (((PlayerInventoryExtension)(this.getInventory())).canInsertStack(item.getStack())) {
+                    Vec3d vec3d = new Vec3d(this.getX() - item.getX(), this.getY() + (double) this.getStandingEyeHeight() / 2.0D - item.getY(), this.getZ() - item.getZ());
+                    double d = vec3d.lengthSquared();
+                    if (d < 256) {
+                        double e = 1.0D - Math.sqrt(d) / 8.0D;
+                        e = e * 4;
+                        item.setVelocity(item.getVelocity().add(vec3d.normalize().multiply(e * e * 0.1D)));
+                    }
                 }
-
             }
             list = this.world.getEntitiesByType(TypeFilter.instanceOf(ExperienceOrbEntity.class),this.getBoundingBox().expand(30D),Entity::isAlive);
             var1 = list.iterator();

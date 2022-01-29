@@ -1,13 +1,19 @@
 package net.fabricmc.morgan.item;
 
-import net.minecraft.client.network.ClientPlayerEntity;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.morgan.ExampleMod;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.entity.projectile.PersistentProjectileEntity;
-import net.minecraft.item.*;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemStack;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
@@ -20,13 +26,20 @@ public class MachineBowItem extends Item {
 
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
-        int ticks = getMaxUseTime(stack) - remainingUseTicks;
-        if (!world.isClient) {
-            ArrowEntity arrowEntity = new ArrowEntity(world, user);
-            arrowEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0F, 3F, ticks/20);
-            world.spawnEntity(arrowEntity);
-            user.setPitch(user.getPitch()+ticks/20);
-        }
+        int ticks = getMaxUseTime(stack)-remainingUseTicks;
+        //if(ticks%5==0) {
+            if (!world.isClient) {
+                ArrowEntity arrowEntity = new ArrowEntity(world, user);
+                arrowEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0F, 4F, (float)ticks/20);
+                arrowEntity.pickupType = PersistentProjectileEntity.PickupPermission.CREATIVE_ONLY;
+                world.spawnEntity(arrowEntity);
+                PacketByteBuf buf = PacketByteBufs.create();
+                buf.writeFloat((float)-(ticks/40));
+                ServerPlayNetworking.send((ServerPlayerEntity)user, ExampleMod.CLIENT_PITCH_ID, buf);
+                world.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.ENTITY_ARROW_SHOOT, SoundCategory.PLAYERS, 1.0F, 1.0F / (world.getRandom().nextFloat() * 0.4F + 1.2F) + 1 * 0.5F);
+            }
+
+        //}
     }
 
     public UseAction getUseAction(ItemStack stack) {

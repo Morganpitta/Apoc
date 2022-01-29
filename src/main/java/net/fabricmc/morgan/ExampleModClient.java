@@ -11,6 +11,7 @@ import net.fabricmc.morgan.entity.EntityExtension;
 import net.fabricmc.morgan.entity.player.PlayerEntityExtension;
 import net.fabricmc.morgan.fluid.MorganFluids;
 import net.fabricmc.morgan.mixin.entity.player.PlayerEntityMixin;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.util.Identifier;
@@ -58,6 +59,15 @@ public class ExampleModClient implements ClientModInitializer {
             client.execute(() -> {
                 // Everything in this lambda is run on the render thread
                 ((PlayerEntityExtension)client.player).setBlind(Bouncy);
+            });
+        });
+
+        //Client pitch stuff
+        ClientPlayNetworking.registerGlobalReceiver(ExampleMod.CLIENT_PITCH_ID, (client, handler, buf, responseSender) -> {
+            float pitch = buf.readFloat();
+            client.execute(() -> {
+                // Everything in this lambda is run on the render thread
+                MinecraftClient.getInstance().getCameraEntity().setPitch(MinecraftClient.getInstance().getCameraEntity().getPitch()+pitch);
             });
         });
 

@@ -6,6 +6,7 @@
   "mixins": [
     "entity.ItemEntityMixin",
     "entity.passive.ChickenEntityMixin",
+    "entity.player.PlayerInventoryMixin",
     "entity.player.PlayerEntityMixin",
     "entity.passive.CowEntityMixin",
     "entity.EntityMixin",
@@ -15,6 +16,7 @@
     "block.SlimeBlockMixin",
     "client.network.ClientPlayerEntityMixin",
     "server.network.ServerPlayerEntityMixin"
+
   ],
   "client": [
     "ExampleMixin"

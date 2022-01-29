@@ -17,6 +17,7 @@ public class ExampleMod implements ModInitializer {
     public static final Identifier CAN_JUMP_PACKET_ID = new Identifier("morgan", "can_jump");
     public static final Identifier BOUNCY_PACKET_ID = new Identifier("morgan", "bouncy");
     public static final Identifier BLIND_PACKET_ID = new Identifier("morgan", "blind");
+    public static final Identifier CLIENT_PITCH_ID = new Identifier("morgan", "blind");
     public static final Logger LOGGER = LogManager.getLogger("modid");
     @Override
     public void onInitialize() {
