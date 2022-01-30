@@ -84,7 +84,7 @@ public class MorganItems {
         SLING_ITEM = register("sling",(Item) (new SlingItem()));
         GLASSES = register((String)"glasses", (Item)(new ArmorItem(MorganArmorMaterials.CUSTOM_IRON_MATERIAL, EquipmentSlot.HEAD, (new Item.Settings()).group(ItemGroup.TOOLS))));
         WET_SHOES = register((String)"wet_shoes", (Item)(new ArmorItem(MorganArmorMaterials.CUSTOM_IRON_MATERIAL, EquipmentSlot.FEET, (new Item.Settings()).group(ItemGroup.TOOLS))));
-        ITEM_MAGNET = register("item_magnet",new Item(new Item.Settings().group(ItemGroup.TOOLS)));
+        ITEM_MAGNET = register("item_magnet",new Item(new Item.Settings().group(ItemGroup.TOOLS).maxCount(1)));
         MACHINE_BOW = register("machine_bow",(Item) (new MachineBowItem()));
     }
 }

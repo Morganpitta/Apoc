@@ -27,19 +27,19 @@ public class MachineBowItem extends Item {
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
         int ticks = getMaxUseTime(stack)-remainingUseTicks;
-        //if(ticks%5==0) {
+        if(ticks%5==0) {
             if (!world.isClient) {
                 ArrowEntity arrowEntity = new ArrowEntity(world, user);
-                arrowEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0F, 4F, (float)ticks/20);
+                arrowEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0F, 8F, (float)ticks/20);
                 arrowEntity.pickupType = PersistentProjectileEntity.PickupPermission.CREATIVE_ONLY;
                 world.spawnEntity(arrowEntity);
                 PacketByteBuf buf = PacketByteBufs.create();
-                buf.writeFloat((float)-(ticks/40));
+                buf.writeFloat((float)-(ticks/10));
                 ServerPlayNetworking.send((ServerPlayerEntity)user, ExampleMod.CLIENT_PITCH_ID, buf);
                 world.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.ENTITY_ARROW_SHOOT, SoundCategory.PLAYERS, 1.0F, 1.0F / (world.getRandom().nextFloat() * 0.4F + 1.2F) + 1 * 0.5F);
             }
 
-        //}
+        }
     }
 
     public UseAction getUseAction(ItemStack stack) {

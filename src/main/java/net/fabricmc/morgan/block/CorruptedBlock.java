@@ -24,10 +24,8 @@ public class CorruptedBlock extends Block {
     }
 
 
-    public void onSteppedOn(World world, BlockPos pos, BlockState state, Entity entity) {
-        super.onSteppedOn(world, pos, state, entity);
+    public void onSteppedOnIgnoringCrouching(World world, BlockPos pos, BlockState state, Entity entity) {
         entity.damage(DamageSource.MAGIC,1f);
-
     }
 
     @Override

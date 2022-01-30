@@ -14,6 +14,7 @@
     "entity.projectile.thrown.EggEntityMixin",
     "block.FluidBlockMixin",
     "block.SlimeBlockMixin",
+    "block.BlockMixin",
     "client.network.ClientPlayerEntityMixin",
     "server.network.ServerPlayerEntityMixin"
 

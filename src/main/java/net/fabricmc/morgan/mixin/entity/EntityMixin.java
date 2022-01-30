@@ -4,8 +4,10 @@ package net.fabricmc.morgan.mixin.entity;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.morgan.ExampleMod;
+import net.fabricmc.morgan.block.BlockExtension;
 import net.fabricmc.morgan.block.MeatBlock;
 import net.fabricmc.morgan.entity.EntityExtension;
+import net.fabricmc.morgan.mixin.block.BlockMixin;
 import net.fabricmc.morgan.world.entity.Bounciness;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -231,18 +233,19 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
                     block.onEntityLand(this.world, (Entity) (Object) this);
                 }
 
-                if (this.onGround && !this.bypassesSteppingEffects()) {
-                    if (getBouncy()&&vec3d.y<0.0D)
-                    {
-                        this.handleFallDamage(fallDistance, 0.0F, DamageSource.FALL);
-                        if (this.isPlayer()) {
+                if (this.onGround) {
+                    ((BlockExtension)block).onSteppedOnIgnoringCrouching(this.world, blockPos, blockState, (Entity) (Object) this);
+                    if(!this.bypassesSteppingEffects()) {
+                        if (getBouncy() && vec3d.y < 0.0D) {
+                            this.handleFallDamage(fallDistance, 0.0F, DamageSource.FALL);
+                            if (this.isPlayer()) {
                                 this.setVelocity(vec3d.x, -vec3d2.y * Bounciness.Bounciness, vec3d.z);
+                            } else {
+                                this.setVelocity(vec3d.x, -vec3d2.y * Bounciness.Bounciness, vec3d.z);
+                            }
                         }
-                        else {
-                            this.setVelocity(vec3d.x, -vec3d2.y * Bounciness.Bounciness, vec3d.z);
-                        }
+                        block.onSteppedOn(this.world, blockPos, blockState, (Entity) (Object) this);
                     }
-                    block.onSteppedOn(this.world, blockPos, blockState, (Entity) (Object) this);
                 }
 
                 Entity.MoveEffect moveEffect = this.getMoveEffect();
