@@ -29,6 +29,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.TypeFilter;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -46,6 +47,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
     protected PlayerEntityMixin(EntityType<? extends LivingEntity> entityType, World world) {
         super(entityType, world);
     }
+    public Vec3d deathPos= new Vec3d(0,255,0);
     public int SleepSheep = 0;
     public boolean CanJump=true;
     public boolean isBlind=false;
@@ -66,6 +68,27 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
             PacketByteBuf buf = PacketByteBufs.create();
             buf.writeBoolean(bool);
             ServerPlayNetworking.send((ServerPlayerEntity) (Object) this, ExampleMod.BLIND_PACKET_ID, buf);
+        }
+    }
+
+    public int getSleepSheep(){return this.SleepSheep;}
+    public void setSleepSheep(int sheep) {
+        this.SleepSheep=sheep;
+        if (!this.world.isClient()) {
+            PacketByteBuf buf = PacketByteBufs.create();
+            buf.writeInt(sheep);
+            ServerPlayNetworking.send((ServerPlayerEntity) (Object) this, ExampleMod.BLIND_PACKET_ID, buf);
+        }
+    }
+
+
+    public Vec3d getDeathPos(){return this.deathPos;}
+    public void setDeathPos(Vec3d pos) {
+        this.deathPos=pos;
+        if (!this.world.isClient()) {
+            PacketByteBuf buf = PacketByteBufs.create();
+            buf.writeBlockPos(new BlockPos((double) pos.x,(double)pos.y,(double)pos.z));
+            ServerPlayNetworking.send((ServerPlayerEntity) (Object) this, ExampleMod.DEATH_PACKET_ID, buf);
         }
     }
 

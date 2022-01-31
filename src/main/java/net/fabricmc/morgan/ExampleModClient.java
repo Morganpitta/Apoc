@@ -10,11 +10,14 @@ import net.fabricmc.morgan.block.MorganBlocks;
 import net.fabricmc.morgan.entity.EntityExtension;
 import net.fabricmc.morgan.entity.player.PlayerEntityExtension;
 import net.fabricmc.morgan.fluid.MorganFluids;
-import net.fabricmc.morgan.mixin.entity.player.PlayerEntityMixin;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3f;
+import net.minecraft.util.math.Vec3i;
 
 public class ExampleModClient implements ClientModInitializer {
 
@@ -68,6 +71,28 @@ public class ExampleModClient implements ClientModInitializer {
             client.execute(() -> {
                 // Everything in this lambda is run on the render thread
                 MinecraftClient.getInstance().getCameraEntity().setPitch(MinecraftClient.getInstance().getCameraEntity().getPitch()+pitch);
+            });
+        });
+
+        //Death stuff
+        ClientPlayNetworking.registerGlobalReceiver(ExampleMod.DEATH_PACKET_ID, (client, handler, buf, responseSender) -> {
+            ExampleMod.LOGGER.info(buf.readBlockPos());
+            Vec3d pos = new Vec3d((double)buf.readBlockPos().getX(),(double)buf.readBlockPos().getY(),(double)buf.readBlockPos().getZ());
+            ExampleMod.LOGGER.info(buf.readBlockPos());
+            client.execute(() -> {
+                // Everything in this lambda is run on the render thread
+                ExampleMod.LOGGER.info(buf.readBlockPos());
+                ((PlayerEntityExtension)client.player).setDeathPos(pos);
+            });
+        });
+
+        //sheep stuff
+        ClientPlayNetworking.registerGlobalReceiver(ExampleMod.SHEEP_PACKET_ID, (client, handler, buf, responseSender) -> {
+            int sheep = buf.readInt();
+            client.execute(() -> {
+                // Everything in this lambda is run on the render thread
+
+                ((PlayerEntityExtension)client.player).setSleepSheep(sheep);
             });
         });
 

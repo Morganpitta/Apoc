@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "morgan:corrupted_fluid"
+    "morgan:corrupted_fluid",
+    "morgan:flowing_corrupted_fluid"
   ]
 }

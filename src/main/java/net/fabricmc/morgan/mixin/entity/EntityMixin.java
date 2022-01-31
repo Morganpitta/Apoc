@@ -1,6 +1,7 @@
 package net.fabricmc.morgan.mixin.entity;
 
 
+import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.morgan.ExampleMod;
@@ -17,11 +18,14 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MovementType;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.Fluid;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.command.CommandOutput;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.tag.BlockTags;
+import net.minecraft.tag.FluidTags;
+import net.minecraft.tag.Tag;
 import net.minecraft.text.Text;
 import net.minecraft.util.Nameable;
 import net.minecraft.util.math.*;
@@ -150,6 +154,12 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
     @Shadow abstract public List<Entity> getPassengerList();
 
     @Shadow abstract public boolean handleFallDamage(float fallDistance, float damageMultiplier, DamageSource damageSource);
+
+    @Shadow protected Object2DoubleMap<Tag<Fluid>> fluidHeight;
+
+    @Shadow protected boolean firstUpdate;
+
+    @Shadow public abstract boolean damage(DamageSource source, float amount);
 
     public EntityMixin(EntityType<?> type, World world) {
 
@@ -329,6 +339,13 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
             this.fallDistance = (float)((double)this.fallDistance - heightDifference);
         }
 
+    }
+
+    @Inject(method = "baseTick",at = @At("HEAD"))
+    public void baseTick(CallbackInfo info){
+        if (!this.firstUpdate && this.fluidHeight.getDouble(FluidTags.CORRUPTED_FLUIDS) > 0.0D){
+            this.damage(DamageSource.MAGIC,1);
+        }
     }
 
 }
