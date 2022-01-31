@@ -40,7 +40,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity {
     @Inject(method = "copyFrom",at = @At("HEAD"))
     public void copyFrom(ServerPlayerEntity oldPlayer, boolean alive,CallbackInfo info) {
         ((EntityExtension)this).setBouncy(((EntityExtension)oldPlayer).getBouncy());
-        ((PlayerEntityMixin)(Object)this).SleepSheep=((PlayerEntityMixin)(Object)oldPlayer).SleepSheep;
+        ((PlayerEntityExtension)this).setSleepSheep(((PlayerEntityExtension)oldPlayer).getSleepSheep());
         ((PlayerEntityExtension)this).setDeathPos((oldPlayer).getPos());
     }
 }

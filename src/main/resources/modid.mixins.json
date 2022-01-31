@@ -15,6 +15,7 @@
     "block.FluidBlockMixin",
     "block.SlimeBlockMixin",
     "block.BlockMixin",
+    "block.GrassBlockMixin",
     "client.network.ClientPlayerEntityMixin",
     "server.network.ServerPlayerEntityMixin"
 

@@ -57,7 +57,7 @@ public class ExampleModClient implements ClientModInitializer {
         });
 
         //Blind stuff
-        ClientPlayNetworking.registerGlobalReceiver(ExampleMod.BOUNCY_PACKET_ID, (client, handler, buf, responseSender) -> {
+        ClientPlayNetworking.registerGlobalReceiver(ExampleMod.BLIND_PACKET_ID, (client, handler, buf, responseSender) -> {
             boolean Bouncy = buf.readBoolean();
             client.execute(() -> {
                 // Everything in this lambda is run on the render thread
@@ -76,12 +76,10 @@ public class ExampleModClient implements ClientModInitializer {
 
         //Death stuff
         ClientPlayNetworking.registerGlobalReceiver(ExampleMod.DEATH_PACKET_ID, (client, handler, buf, responseSender) -> {
-            ExampleMod.LOGGER.info(buf.readBlockPos());
-            Vec3d pos = new Vec3d((double)buf.readBlockPos().getX(),(double)buf.readBlockPos().getY(),(double)buf.readBlockPos().getZ());
-            ExampleMod.LOGGER.info(buf.readBlockPos());
+            BlockPos blockpos = buf.readBlockPos();
+            Vec3d pos = new Vec3d((double)blockpos.getX(),(double)blockpos.getY(),(double)blockpos.getZ());
             client.execute(() -> {
                 // Everything in this lambda is run on the render thread
-                ExampleMod.LOGGER.info(buf.readBlockPos());
                 ((PlayerEntityExtension)client.player).setDeathPos(pos);
             });
         });

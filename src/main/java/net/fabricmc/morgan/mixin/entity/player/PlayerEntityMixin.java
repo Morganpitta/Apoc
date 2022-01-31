@@ -47,7 +47,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
     protected PlayerEntityMixin(EntityType<? extends LivingEntity> entityType, World world) {
         super(entityType, world);
     }
-    public Vec3d deathPos= new Vec3d(0,255,0);
+    public Vec3d deathPos= new Vec3d(0,-255,0);
     public int SleepSheep = 0;
     public boolean CanJump=true;
     public boolean isBlind=false;

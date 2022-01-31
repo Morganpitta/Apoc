@@ -4533,6 +4533,8 @@
   "commands.bounciness.success.single": "Set bounciness to %f",
   "commands.bouncy.success.single": "Made %s %s",
   "commands.bouncy.success.multiple": "Made %d entities %s",
+  "commands.death.success": "Teleported %s to their death point",
+  "commands.death.failure": "%s has no death point",
   "commands.forceload.added.failure": "No chunks were marked for force loading",
   "commands.forceload.added.single": "Marked chunk %s in %s to be force loaded",
   "commands.forceload.added.multiple": "Marked %s chunks in %s from %s to %s to be force loaded",
