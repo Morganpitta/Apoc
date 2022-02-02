@@ -10,6 +10,7 @@ import net.fabricmc.morgan.item.MorganItems;
 import net.fabricmc.morgan.server.command.BouncinessCommand;
 import net.fabricmc.morgan.server.command.BouncyCommand;
 import net.fabricmc.morgan.server.command.DeathCommand;
+import net.fabricmc.morgan.tag.MorganItemTags;
 import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

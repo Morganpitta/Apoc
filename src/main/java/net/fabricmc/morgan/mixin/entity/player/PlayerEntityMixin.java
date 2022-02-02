@@ -47,6 +47,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
     protected PlayerEntityMixin(EntityType<? extends LivingEntity> entityType, World world) {
         super(entityType, world);
     }
+    public int tick = 0;
     public Vec3d deathPos= new Vec3d(0,-255,0);
     public int SleepSheep = 0;
     public boolean CanJump=true;
@@ -116,6 +117,9 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
     }
     @Inject(method = "tick",at = @At("HEAD"))
     public void tick(CallbackInfo info) {
+        if (!this.world.isClient()&&tick ==20) {
+            ((PlayerInventoryExtension) this.getInventory()).getWeight();
+        }
         if (this.isSad){
             giveUpAndDie();
         }
@@ -179,7 +183,10 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
 
             }
         }
-
+        tick++;
+        if (tick >20){
+            tick = 0;
+        }
     }
 
     @Overwrite

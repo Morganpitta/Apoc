@@ -17,7 +17,8 @@
     "block.BlockMixin",
     "block.GrassBlockMixin",
     "client.network.ClientPlayerEntityMixin",
-    "server.network.ServerPlayerEntityMixin"
+    "server.network.ServerPlayerEntityMixin",
+    "item.ItemMixin"
 
   ],
   "client": [
