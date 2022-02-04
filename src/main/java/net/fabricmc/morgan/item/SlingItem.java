@@ -37,6 +37,10 @@ public class SlingItem extends Item implements Vanishable {
     public static final float field_30927 = 8.0F;
     public static final float field_30928 = 2.5F;
 
+    public boolean slowsDownUser(){
+        return false;
+    }
+
     public UseAction getUseAction(ItemStack stack) {
         return UseAction.BOW;
     }

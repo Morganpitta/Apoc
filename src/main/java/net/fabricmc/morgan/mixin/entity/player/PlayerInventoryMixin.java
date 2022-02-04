@@ -67,7 +67,7 @@ public abstract class PlayerInventoryMixin implements Inventory, Nameable, Playe
     }
      **/
 
-    public void getWeight(){
+    public float getWeight(){
         float weight=0;
         //main inventory
         for(int i = 0; i < this.main.size(); ++i) {
@@ -88,7 +88,8 @@ public abstract class PlayerInventoryMixin implements Inventory, Nameable, Playe
             //ExampleMod.LOGGER.info((ItemStack) this.offHand.get(0));
             weight+=this.offHand.get(0).getCount()*getWeightOfItem(this.offHand.get(0));
         }
-        ExampleMod.LOGGER.info(weight);
+        //ExampleMod.LOGGER.info(weight);
+        return weight;
     }
 
     private float getWeightOfItem(ItemStack itemStack) {

@@ -13,4 +13,6 @@ public interface PlayerEntityExtension {
     void setDeathPos(Vec3d pos);
     int getSleepSheep();
     void setSleepSheep(int sheep);
+    boolean getAffectedByWeight();
+    void setAffectedByWeight(boolean bool);
 }

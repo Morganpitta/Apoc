@@ -94,6 +94,15 @@ public class ExampleModClient implements ClientModInitializer {
             });
         });
 
+        //Blind stuff
+        ClientPlayNetworking.registerGlobalReceiver(ExampleMod.WEIGHT_PACKET_ID, (client, handler, buf, responseSender) -> {
+            boolean bool = buf.readBoolean();
+            client.execute(() -> {
+                // Everything in this lambda is run on the render thread
+                ((PlayerEntityExtension)client.player).setAffectedByWeight(bool);
+            });
+        });
+
         //makes chlorine block seethrough
         BlockRenderLayerMap.INSTANCE.putBlock(MorganBlocks.CHLORINE_GAS, RenderLayer.getTranslucent());
         BlockRenderLayerMap.INSTANCE.putBlock(MorganBlocks.MEAT_BLOCK,RenderLayer.getTranslucent());

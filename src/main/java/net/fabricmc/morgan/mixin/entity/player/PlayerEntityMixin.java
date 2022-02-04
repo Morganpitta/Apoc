@@ -48,30 +48,19 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
         super(entityType, world);
     }
     public int tick = 0;
+
     public Vec3d deathPos= new Vec3d(0,-255,0);
-    public int SleepSheep = 0;
-    public boolean CanJump=true;
-    public boolean isBlind=false;
-    public boolean isSad = false;
-    public boolean getJump() {return this.CanJump;}
-    public void setJump(boolean bool) {
-        this.CanJump=bool;
+    public Vec3d getDeathPos(){return this.deathPos;}
+    public void setDeathPos(Vec3d pos) {
+        this.deathPos=pos;
         if (!this.world.isClient()) {
             PacketByteBuf buf = PacketByteBufs.create();
-            buf.writeBoolean(bool);
-            ServerPlayNetworking.send((ServerPlayerEntity) (Object) this, ExampleMod.CAN_JUMP_PACKET_ID, buf);
-        }
-    }
-    public boolean getBlind() {return this.isBlind;}
-    public void setBlind(boolean bool) {
-        this.isBlind=bool;
-        if (!this.world.isClient()) {
-            PacketByteBuf buf = PacketByteBufs.create();
-            buf.writeBoolean(bool);
-            ServerPlayNetworking.send((ServerPlayerEntity) (Object) this, ExampleMod.BLIND_PACKET_ID, buf);
+            buf.writeBlockPos(new BlockPos((double) pos.x,(double)pos.y,(double)pos.z));
+            ServerPlayNetworking.send((ServerPlayerEntity) (Object) this, ExampleMod.DEATH_PACKET_ID, buf);
         }
     }
 
+    public int SleepSheep = 0;
     public int getSleepSheep(){return this.SleepSheep;}
     public void setSleepSheep(int sheep) {
         this.SleepSheep=sheep;
@@ -82,13 +71,37 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
         }
     }
 
-
-    public Vec3d getDeathPos(){return this.deathPos;}
-    public void setDeathPos(Vec3d pos) {
-        this.deathPos=pos;
+    public boolean CanJump=true;
+    public boolean getJump() {return this.CanJump;}
+    public void setJump(boolean bool) {
+        this.CanJump=bool;
         if (!this.world.isClient()) {
             PacketByteBuf buf = PacketByteBufs.create();
-            buf.writeBlockPos(new BlockPos((double) pos.x,(double)pos.y,(double)pos.z));
+            buf.writeBoolean(bool);
+            ServerPlayNetworking.send((ServerPlayerEntity) (Object) this, ExampleMod.CAN_JUMP_PACKET_ID, buf);
+        }
+    }
+
+    public boolean isBlind=false;
+    public boolean getBlind() {return this.isBlind;}
+    public void setBlind(boolean bool) {
+        this.isBlind=bool;
+        if (!this.world.isClient()) {
+            PacketByteBuf buf = PacketByteBufs.create();
+            buf.writeBoolean(bool);
+            ServerPlayNetworking.send((ServerPlayerEntity) (Object) this, ExampleMod.WEIGHT_PACKET_ID, buf);
+        }
+    }
+
+    public boolean isSad = false;
+
+    public boolean isAffectedByWeight = true;
+    public boolean getAffectedByWeight(){return this.isAffectedByWeight;}
+    public void setAffectedByWeight(boolean bool) {
+        this.isAffectedByWeight=bool;
+        if (!this.world.isClient()) {
+            PacketByteBuf buf = PacketByteBufs.create();
+            buf.writeBoolean(bool);
             ServerPlayNetworking.send((ServerPlayerEntity) (Object) this, ExampleMod.DEATH_PACKET_ID, buf);
         }
     }
@@ -117,15 +130,22 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
     }
     @Inject(method = "tick",at = @At("HEAD"))
     public void tick(CallbackInfo info) {
+        /**
         if (!this.world.isClient()&&tick ==20) {
             ((PlayerInventoryExtension) this.getInventory()).getWeight();
         }
+         **/
         if (this.isSad){
             giveUpAndDie();
         }
         if ((Objects.equals(this.getEntityName(), "Zenxuss") || Objects.equals(this.getEntityName(), "alex_2772"))&&!this.getBlind()) {
             this.setBlind(true);
         }
+
+        if ((Objects.equals(this.getEntityName(), "Slic_e"))&&!this.getBlind()) {
+            this.setAffectedByWeight(true);
+        }
+
         if (this.isSleeping()&&!this.world.isClient)
         {
             SleepSheep=SleepSheep+1;
