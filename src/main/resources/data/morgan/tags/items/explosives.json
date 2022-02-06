@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:gunpowder",
+    "minecraft:tnt",
+    "minecraft:tnt_minecart"
+  ]
+}

@@ -11,6 +11,7 @@ import net.minecraft.util.registry.Registry;
 
 public class MorganItemTags {
     public static final Tag<Item> WEIGHTLESS = TagFactory.ITEM.create(new Identifier("morgan", "weightless"));
+    public static final Tag<Item> EXPLOSIVE = TagFactory.ITEM.create(new Identifier("morgan", "explosives"));
 
     public MorganItemTags() {
     }

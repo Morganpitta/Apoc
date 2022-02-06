@@ -6,15 +6,14 @@ import net.fabricmc.morgan.entity.player.PlayerEntityExtension;
 import net.fabricmc.morgan.entity.player.PlayerInventoryExtension;
 import net.fabricmc.morgan.item.ItemExtension;
 import net.fabricmc.morgan.item.MorganItems;
+import net.fabricmc.morgan.mixin.entity.player.PlayerEntityMixin;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.input.Input;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.EntityPose;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.JumpingMount;
+import net.minecraft.entity.*;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ElytraItem;
@@ -31,14 +30,15 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ClientPlayerEntity.class)
-public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity {
+public abstract class ClientPlayerEntityMixin extends PlayerEntityMixin {
 
 
-    public ClientPlayerEntityMixin(ClientWorld world, GameProfile profile) {
-        super(world, profile);
+    protected ClientPlayerEntityMixin(EntityType<? extends LivingEntity> entityType, World world) {
+        super(entityType, world);
     }
 
     @Shadow public int ticksSinceSprintingChanged;
@@ -85,26 +85,12 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
             MinecraftClient.getInstance().options.viewDistance = this.defaultViewDistance;
             MinecraftClient.getInstance().options.entityDistanceScaling = this.defaultEntityDistanceScaling;
         }
+
+
     }
 
-    @Inject(method = "tickMovement()V",at=@At("HEAD"))
+    @Inject(method = "tickMovement()V",cancellable = true, at = @At(value = "INVOKE", target="Lnet/minecraft/client/tutorial/TutorialManager;onMovement(Lnet/minecraft/client/input/Input;)V", shift = At.Shift.AFTER,ordinal = 0))
     public void tickMovement(CallbackInfo info) {
-        ExampleMod.LOGGER.info("ding suff");
-        if (((PlayerEntityExtension)this).getAffectedByWeight()) {
-            ExampleMod.LOGGER.info("ding more suff");
-            float weight = ((PlayerInventoryExtension) this.getInventory()).getWeight();
-            weight +=0.01;
-            ExampleMod.LOGGER.info("ding more suff"+weight);
-            weight = 1/weight;
-            ExampleMod.LOGGER.info("ding more suff"+weight);
-            weight *= 128;
-            ExampleMod.LOGGER.info("ding more suff"+weight);
-            Input var10000 = this.input;
-            var10000.movementSideways *= weight;
-            var10000 = this.input;
-            var10000.movementForward *= weight;
-        }
-
         /**
         ++this.ticksSinceSprintingChanged;
         if (this.ticksLeftToDoubleTapSprint > 0) {
@@ -125,7 +111,31 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
             var10000.movementForward *= 0.2F;
             this.ticksLeftToDoubleTapSprint = 0;
         }
+         **/
 
+
+
+        //ExampleMod.LOGGER.info("ding suff");
+        if (((PlayerEntityExtension)this).getAffectedByWeight()) {
+            //ExampleMod.LOGGER.info("ding more suff");
+            float weight = ((PlayerInventoryExtension) this.getInventory()).getWeight();
+            weight += 0.01;
+            //ExampleMod.LOGGER.info("ding more suff" + weight);
+            weight = 1 / weight;
+            //ExampleMod.LOGGER.info("ding more suff" + weight);
+            weight *= 1024;
+            //ExampleMod.LOGGER.info("ding more suff" + weight);
+            Input var10000 = this.input;
+            //ExampleMod.LOGGER.info("pervious" + var10000.movementSideways);
+            var10000.movementSideways *= weight;
+            //ExampleMod.LOGGER.info("after" + var10000.movementSideways);
+            var10000 = this.input;
+            //ExampleMod.LOGGER.info("pervious" + var10000.movementForward);
+            var10000.movementForward *= weight;
+            //ExampleMod.LOGGER.info("after" + var10000.movementForward);
+        }
+
+        /**
         boolean bl4 = false;
         if (this.ticksToNextAutojump > 0) {
             --this.ticksToNextAutojump;
@@ -260,6 +270,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
             this.getAbilities().flying = false;
             this.sendAbilitiesUpdate();
         }
-        **/
+
+         **/
     }
 }

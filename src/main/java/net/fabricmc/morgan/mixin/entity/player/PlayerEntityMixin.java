@@ -12,15 +12,23 @@ import net.fabricmc.morgan.entity.EntityExtension;
 import net.fabricmc.morgan.entity.player.PlayerEntityExtension;
 import net.fabricmc.morgan.entity.player.PlayerInventoryExtension;
 import net.fabricmc.morgan.item.MorganItems;
+import net.fabricmc.morgan.tag.MorganItemTags;
 import net.minecraft.entity.*;
+import net.minecraft.entity.attribute.EntityAttributeInstance;
+import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.stat.Stat;
 import net.minecraft.stat.Stats;
 import net.minecraft.text.Text;
@@ -31,6 +39,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
+import net.minecraft.world.explosion.Explosion;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -41,13 +50,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEntityExtension, EntityExtension {
     protected PlayerEntityMixin(EntityType<? extends LivingEntity> entityType, World world) {
         super(entityType, world);
     }
+
+    private static final UUID WEIGHT_SPEED_ID = UUID.fromString("2f9a3e00-7c2b-4916-9a5b-56804fa6cc91");
+
     public int tick = 0;
+    public int onFireForTicks=0;
+    public int fuse=-100;
 
     public Vec3d deathPos= new Vec3d(0,-255,0);
     public Vec3d getDeathPos(){return this.deathPos;}
@@ -106,6 +121,11 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
         }
     }
 
+    @Shadow public abstract HungerManager getHungerManager();
+    @Shadow public abstract boolean checkFallFlying();
+    @Shadow protected int abilityResyncCountdown;
+    @Shadow public abstract void sendAbilitiesUpdate();
+    @Shadow public abstract PlayerAbilities getAbilities();
     @Shadow protected HungerManager hungerManager = new HungerManager();
     @Shadow private final PlayerAbilities abilities = new PlayerAbilities();
     @Shadow public void incrementStat(Identifier stat) {this.incrementStat(Stats.CUSTOM.getOrCreateStat(stat));}
@@ -128,6 +148,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
     public void giveUpAndDie(){
         this.kill();
     }
+
     @Inject(method = "tick",at = @At("HEAD"))
     public void tick(CallbackInfo info) {
         /**
@@ -135,6 +156,21 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
             ((PlayerInventoryExtension) this.getInventory()).getWeight();
         }
          **/
+        if (this.isOnFire()){
+            onFireForTicks++;
+            if (onFireForTicks>20&&(this.getInventory().contains(MorganItemTags.EXPLOSIVE))&&fuse<0) {
+                world.playSound((PlayerEntity)null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_TNT_PRIMED, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                fuse = 20;
+            }
+            if (fuse < 0&&fuse >-10){
+                this.world.createExplosion(this,this.getX(), this.getY(),this.getZ(),30, true, Explosion.DestructionType.BREAK);
+                fuse = -100;
+            }
+            fuse--;
+        }
+        else {
+            onFireForTicks--;
+        }
         if (this.isSad){
             giveUpAndDie();
         }
@@ -209,6 +245,20 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
         }
     }
 
+    @Inject(method = "tickMovement",at = @At("HEAD"))
+    public void tickMovement(CallbackInfo info) {
+        /**
+        float weight = ((PlayerInventoryExtension) this.getInventory()).getWeight();
+        weight += 0.01;
+        //ExampleMod.LOGGER.info("doing suff"+weight);
+        weight = 1 / weight;
+        //ExampleMod.LOGGER.info("doing more suff"+weight);
+        weight *= 128;
+        ExampleMod.LOGGER.info("doing more suff" + weight);
+        this.setMovementSpeed(this.getMovementSpeed() * weight);
+         **/
+    }
+
     @Overwrite
     public void jump() {
         super.jump();
@@ -220,7 +270,6 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
         }
     }
 
-    @Override
     public void SwitchJump()
     {
         if (getJump()) {
@@ -230,5 +279,4 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
         }
         //ExampleMod.LOGGER.info(String.valueOf(Text.of("setting can jump to: "+this.CanJump+ " for: "+this)), false);
     }
-
 }
