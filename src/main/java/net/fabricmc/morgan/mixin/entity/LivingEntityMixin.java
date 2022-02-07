@@ -4,7 +4,6 @@ import com.google.common.base.Objects;
 import net.fabricmc.morgan.ExampleMod;
 import net.fabricmc.morgan.entity.EntityExtension;
 import net.fabricmc.morgan.entity.player.PlayerEntityExtension;
-import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.*;
@@ -16,14 +15,14 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
-import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
+import net.minecraft.tag.EntityTypeTags;
 import net.minecraft.tag.FluidTags;
-import net.minecraft.text.Text;
+import net.minecraft.tag.Tag;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -31,9 +30,7 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
 import java.util.Optional;
 
 @Mixin(LivingEntity.class)
@@ -95,6 +92,29 @@ public abstract class LivingEntityMixin extends Entity implements EntityExtensio
     @Shadow public abstract StatusEffectInstance getStatusEffect(StatusEffect effect);
     @Shadow public abstract boolean hasNoDrag();
     @Shadow public abstract void updateLimbs(LivingEntity entity, boolean flutter);
+    @Shadow public int jumpingCooldown;
+    @Shadow public int bodyTrackingIncrements;
+    @Shadow protected double serverX;
+    @Shadow protected double serverY;
+    @Shadow protected double serverZ;
+    @Shadow protected double serverYaw;
+    @Shadow protected double serverPitch;
+    @Shadow protected double serverHeadYaw;
+    @Shadow protected int headTrackingIncrements;
+    @Shadow protected abstract boolean isImmobile();
+    @Shadow protected boolean jumping;
+    @Shadow public float sidewaysSpeed;
+    @Shadow public float upwardSpeed;
+    @Shadow public float forwardSpeed;
+    @Shadow protected abstract void swimUpward(Tag<Fluid> fluid);
+    @Shadow public abstract void tickFallFlying();
+    @Shadow public abstract void removePowderSnowSlow();
+    @Shadow public abstract void addPowderSnowSlowIfNeeded();
+    @Shadow protected int riptideTicks;
+    @Shadow public abstract void tickRiptide(Box a, Box b);
+    @Shadow public abstract void tickCramming();
+    @Shadow public abstract boolean hurtByWater();
+    @Shadow public abstract void tickNewAi();
 
     @Overwrite
     public boolean handleFallDamage(float fallDistance, float damageMultiplier, DamageSource damageSource){
@@ -395,5 +415,133 @@ public abstract class LivingEntityMixin extends Entity implements EntityExtensio
         }
 
         this.updateLimbs((LivingEntity) (Object)this, this instanceof Flutterer);
+    }
+
+    @Overwrite
+    public void tickMovement() {
+        if (this.jumpingCooldown > 0) {
+            --this.jumpingCooldown;
+        }
+
+        if (this.isLogicalSideForUpdatingMovement()) {
+            this.bodyTrackingIncrements = 0;
+            this.updateTrackedPosition(this.getX(), this.getY(), this.getZ());
+        }
+
+        if (this.bodyTrackingIncrements > 0) {
+            double d = this.getX() + (this.serverX - this.getX()) / (double)this.bodyTrackingIncrements;
+            double e = this.getY() + (this.serverY - this.getY()) / (double)this.bodyTrackingIncrements;
+            double f = this.getZ() + (this.serverZ - this.getZ()) / (double)this.bodyTrackingIncrements;
+            double g = MathHelper.wrapDegrees(this.serverYaw - (double)this.getYaw());
+            this.setYaw(this.getYaw() + (float)g / (float)this.bodyTrackingIncrements);
+            this.setPitch(this.getPitch() + (float)(this.serverPitch - (double)this.getPitch()) / (float)this.bodyTrackingIncrements);
+            --this.bodyTrackingIncrements;
+            this.setPosition(d, e, f);
+            this.setRotation(this.getYaw(), this.getPitch());
+        } else if (!this.canMoveVoluntarily()) {
+            this.setVelocity(this.getVelocity().multiply(0.98D));
+        }
+
+        if (this.headTrackingIncrements > 0) {
+            this.headYaw = (float)((double)this.headYaw + MathHelper.wrapDegrees(this.serverHeadYaw - (double)this.headYaw) / (double)this.headTrackingIncrements);
+            --this.headTrackingIncrements;
+        }
+
+        Vec3d d = this.getVelocity();
+        double h = d.x;
+        double i = d.y;
+        double j = d.z;
+        if (Math.abs(d.x) < 0.003D) {
+            h = 0.0D;
+        }
+
+        if (Math.abs(d.y) < 0.003D) {
+            i = 0.0D;
+        }
+
+        if (Math.abs(d.z) < 0.003D) {
+            j = 0.0D;
+        }
+
+        this.setVelocity(h, i, j);
+        this.world.getProfiler().push("ai");
+        if (this.isImmobile()) {
+            this.jumping = false;
+            this.sidewaysSpeed = 0.0F;
+            this.forwardSpeed = 0.0F;
+        } else if (this.canMoveVoluntarily()) {
+            this.world.getProfiler().push("newAi");
+            this.tickNewAi();
+            this.world.getProfiler().pop();
+        }
+
+        this.world.getProfiler().pop();
+        this.world.getProfiler().push("jump");
+
+        if (this.jumping && this.shouldSwimInFluids()) {
+            double k;
+            if (this.isInLava()) {
+                k = this.getFluidHeight(FluidTags.LAVA);
+            } else {
+                k = this.getFluidHeight(FluidTags.WATER);
+            }
+
+            boolean bl = this.isTouchingWater() && k > 0.0D;
+            double l = this.getSwimHeight();
+            if (bl && (!this.onGround || k > l)) {
+                this.swimUpward(FluidTags.WATER);
+            } else if (!this.isInLava() || this.onGround && !(k > l)) {
+                if ((this.onGround || bl && k <= l) && this.jumpingCooldown == 0) {
+                    this.jump();
+                    this.jumpingCooldown = 10;
+                }
+            } else {
+                this.swimUpward(FluidTags.LAVA);
+            }
+        } else {
+            this.jumpingCooldown = 0;
+        }
+
+        this.world.getProfiler().pop();
+        this.world.getProfiler().push("travel");
+        this.sidewaysSpeed *= 0.98F;
+        this.forwardSpeed *= 0.98F;
+        this.tickFallFlying();
+        Box k = this.getBoundingBox();
+        this.travel(new Vec3d((double)this.sidewaysSpeed, (double)this.upwardSpeed, (double)this.forwardSpeed));
+
+        this.world.getProfiler().pop();
+        this.world.getProfiler().push("freezing");
+        boolean bl2 = this.getType().isIn(EntityTypeTags.FREEZE_HURTS_EXTRA_TYPES);
+        int bl;
+        if (!this.world.isClient && !this.isDead()) {
+            bl = this.getFrozenTicks();
+            if (this.inPowderSnow && this.canFreeze()) {
+                this.setFrozenTicks(Math.min(this.getMinFreezeDamageTicks(), bl + 1));
+            } else {
+                this.setFrozenTicks(Math.max(0, bl - 2));
+            }
+        }
+
+        this.removePowderSnowSlow();
+        this.addPowderSnowSlowIfNeeded();
+        if (!this.world.isClient && this.age % 40 == 0 && this.isFreezing() && this.canFreeze()) {
+            bl = bl2 ? 5 : 1;
+            this.damage(DamageSource.FREEZE, (float)bl);
+        }
+
+        this.world.getProfiler().pop();
+        this.world.getProfiler().push("push");
+        if (this.riptideTicks > 0) {
+            --this.riptideTicks;
+            this.tickRiptide(k, this.getBoundingBox());
+        }
+
+        this.tickCramming();
+        this.world.getProfiler().pop();
+        if (!this.world.isClient && this.hurtByWater() && this.isWet()) {
+            this.damage(DamageSource.DROWN, 1.0F);
+        }
+
     }
 }

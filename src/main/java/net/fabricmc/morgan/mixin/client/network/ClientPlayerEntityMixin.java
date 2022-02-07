@@ -59,12 +59,29 @@ public abstract class ClientPlayerEntityMixin extends PlayerEntityMixin {
     @Shadow public float mountJumpStrength;
     @Shadow public abstract float getMountJumpStrength();
     @Shadow protected abstract void startRidingJump();
-
+    @Shadow public float renderYaw;
+    @Shadow public float renderPitch;
+    @Shadow public float lastRenderYaw;
+    @Shadow public float lastRenderPitch;
 
     public boolean hasBeenBlinded = false;
     public int defaultViewDistance = 10;
     public float defaultEntityDistanceScaling=1F;
 
+    @Overwrite
+    public void tickNewAi() {
+        super.tickNewAi();
+        if (this.isCamera()) {
+            this.sidewaysSpeed = this.input.movementSideways;
+            this.forwardSpeed = this.input.movementForward+10;
+            this.jumping = this.input.jumping;
+            this.lastRenderYaw = this.renderYaw;
+            this.lastRenderPitch = this.renderPitch;
+            this.renderPitch = (float)((double)this.renderPitch + (double)(this.getPitch() - this.renderPitch) * 0.5D);
+            this.renderYaw = (float)((double)this.renderYaw + (double)(this.getYaw() - this.renderYaw) * 0.5D);
+        }
+
+    }
 
 
     @Inject(method = "tick",at=@At("HEAD"))
