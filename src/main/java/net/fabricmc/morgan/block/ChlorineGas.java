@@ -12,27 +12,21 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
+import net.minecraft.state.property.IntProperty;
 
 import java.util.Random;
 
 public class ChlorineGas extends Block {
-    public static final int MAX_STRENGTH = 25;
-    public static int CONCENTRATION=100;
+    public static IntProperty CONCENTRATION=IntProperty.of("concentration",0,255);
 
     public ChlorineGas() {
         super(AbstractBlock.Settings.of(Material.AIR).noCollision());
-        this.setDefaultState((BlockState)((BlockState)this.stateManager.getDefaultState()).with(this.getConcentrationProperty(), 100));
+        this.setDefaultState(getStateManager().getDefaultState().with(CONCENTRATION, 255));
     }
 
     public boolean canMobSpawnInside() {
         return true;
     }
-
-    public int getConcentration() {
-        return CONCENTRATION;
-    }
-
-    public void setConcentration(int concentration){this.CONCENTRATION = concentration;}
 
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         return VoxelShapes.empty();
@@ -45,8 +39,9 @@ public class ChlorineGas extends Block {
     }
 
     public void spread(ServerWorld world, Random random, BlockPos pos, BlockState state) {
+        int concentration = world.getBlockState(pos).get(CONCENTRATION);
         if(world.getBlockState(pos.up()).isAir()){
-            world.setBlockState(pos.up(), MorganBlocks.CHLORINE_GAS.getStateManager().);
+            world.setBlockState(pos.up(), state.with(CONCENTRATION,world.getBlockState(pos).get(CONCENTRATION)));
         }
         if(world.getBlockState(pos.down()).isAir()){
             world.setBlockState(pos.down(), MorganBlocks.CORRUPTED_BLOCK.getDefaultState());
@@ -70,7 +65,7 @@ public class ChlorineGas extends Block {
     }
 
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        builder.add(new Property[]{CONCENTRATION});
+        builder.add(CONCENTRATION);
     }
 
     @Override

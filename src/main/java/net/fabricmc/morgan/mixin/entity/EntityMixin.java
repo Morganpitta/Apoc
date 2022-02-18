@@ -351,11 +351,13 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
     @Overwrite
     private static Vec3d movementInputToVelocity(Vec3d movementInput, float speed, float yaw) {
         double d = movementInput.lengthSquared();
-        ExampleMod.LOGGER.info(d);
+        //ExampleMod.LOGGER.info(d);
         if (d < 1.0E-7D) {
             return Vec3d.ZERO;
         } else {
-            Vec3d vec3d = (d > 10.0D ? movementInput.normalize() : movementInput).multiply((double)speed);
+            //ExampleMod.LOGGER.info(movementInput);
+            Vec3d vec3d = (d > 1000000.0D ? movementInput.normalize() : movementInput).multiply((double)speed);
+            //ExampleMod.LOGGER.info(vec3d);
             float f = MathHelper.sin(yaw * 0.017453292F);
             float g = MathHelper.cos(yaw * 0.017453292F);
             return new Vec3d(vec3d.x * (double)g - vec3d.z * (double)f, vec3d.y, vec3d.z * (double)g + vec3d.x * (double)f);

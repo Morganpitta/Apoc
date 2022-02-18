@@ -73,7 +73,7 @@ public abstract class ClientPlayerEntityMixin extends PlayerEntityMixin {
         super.tickNewAi();
         if (this.isCamera()) {
             this.sidewaysSpeed = this.input.movementSideways;
-            this.forwardSpeed = this.input.movementForward+10;
+            this.forwardSpeed = this.input.movementForward;
             this.jumping = this.input.jumping;
             this.lastRenderYaw = this.renderYaw;
             this.lastRenderPitch = this.renderPitch;
@@ -133,11 +133,9 @@ public abstract class ClientPlayerEntityMixin extends PlayerEntityMixin {
         if (((PlayerEntityExtension)this).getAffectedByWeight()) {
             //ExampleMod.LOGGER.info("ding more suff");
             float weight = ((PlayerInventoryExtension) this.getInventory()).getWeight();
-            weight += 0.01;
+            if (weight < 0 ) {weight *=-1;}
             //ExampleMod.LOGGER.info("ding more suff" + weight);
-            weight = 1 / weight;
-            //ExampleMod.LOGGER.info("ding more suff" + weight);
-            weight *= 1024;
+            weight = ((64*9-37) / (weight-37));
             //ExampleMod.LOGGER.info("ding more suff" + weight);
             Input var10000 = this.input;
             //ExampleMod.LOGGER.info("pervious" + var10000.movementSideways);
