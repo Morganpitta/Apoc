@@ -40,6 +40,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -127,6 +128,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
     @Shadow public abstract void sendAbilitiesUpdate();
     @Shadow public abstract PlayerAbilities getAbilities();
     @Shadow protected HungerManager hungerManager = new HungerManager();
+    @Final
     @Shadow private final PlayerAbilities abilities = new PlayerAbilities();
     @Shadow public void incrementStat(Identifier stat) {this.incrementStat(Stats.CUSTOM.getOrCreateStat(stat));}
     @Shadow  public void incrementStat(Stat<?> stat) {
@@ -257,17 +259,6 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
         ExampleMod.LOGGER.info("doing more suff" + weight);
         this.setMovementSpeed(this.getMovementSpeed() * weight);
          **/
-    }
-
-    @Overwrite
-    public void jump() {
-        super.jump();
-        this.incrementStat(Stats.JUMP);
-        if (this.isSprinting()) {
-            this.addExhaustion(0.2F);
-        } else {
-            this.addExhaustion(0.05F);
-        }
     }
 
     public void SwitchJump()

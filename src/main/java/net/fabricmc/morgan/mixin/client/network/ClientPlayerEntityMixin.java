@@ -1,7 +1,5 @@
 package net.fabricmc.morgan.mixin.client.network;
 
-import com.mojang.authlib.GameProfile;
-import net.fabricmc.morgan.ExampleMod;
 import net.fabricmc.morgan.entity.player.PlayerEntityExtension;
 import net.fabricmc.morgan.entity.player.PlayerInventoryExtension;
 import net.fabricmc.morgan.item.ItemExtension;
@@ -9,27 +7,20 @@ import net.fabricmc.morgan.item.MorganItems;
 import net.fabricmc.morgan.mixin.entity.player.PlayerEntityMixin;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.input.Input;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.*;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ElytraItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
-import net.minecraft.tag.FluidTags;
 import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 @Mixin(ClientPlayerEntity.class)
 public abstract class ClientPlayerEntityMixin extends PlayerEntityMixin {
@@ -68,19 +59,30 @@ public abstract class ClientPlayerEntityMixin extends PlayerEntityMixin {
     public int defaultViewDistance = 10;
     public float defaultEntityDistanceScaling=1F;
 
+    /**
+     * @author Morgan
+     */
     @Overwrite
     public void tickNewAi() {
         super.tickNewAi();
         if (this.isCamera()) {
-            this.sidewaysSpeed = this.input.movementSideways;
-            this.forwardSpeed = this.input.movementForward;
             this.jumping = this.input.jumping;
             this.lastRenderYaw = this.renderYaw;
             this.lastRenderPitch = this.renderPitch;
-            this.renderPitch = (float)((double)this.renderPitch + (double)(this.getPitch() - this.renderPitch) * 0.5D);
-            this.renderYaw = (float)((double)this.renderYaw + (double)(this.getYaw() - this.renderYaw) * 0.5D);
-        }
+            if (this.hasStatusEffect(StatusEffects.NAUSEA)) {
+                this.sidewaysSpeed = -this.input.movementSideways;
+                this.forwardSpeed = -this.input.movementForward;
+                this.renderPitch = (float) ((double) this.renderPitch + (double) (this.getPitch() - this.renderPitch) * 0.5D);
+                this.renderYaw = (float) ((double) this.renderYaw + (double) (this.getYaw() - this.renderYaw) * 0.5D);
+            }
+            else {
+                this.sidewaysSpeed = this.input.movementSideways;
+                this.forwardSpeed = this.input.movementForward;
+                this.renderPitch = (float) ((double) this.renderPitch + (double) (this.getPitch() - this.renderPitch) * 0.5D);
+                this.renderYaw = (float) ((double) this.renderYaw + (double) (this.getYaw() - this.renderYaw) * 0.5D);
+            }
 
+        }
     }
 
 
@@ -103,7 +105,12 @@ public abstract class ClientPlayerEntityMixin extends PlayerEntityMixin {
 
     }
 
-    @Inject(method = "tickMovement()V",cancellable = true, at = @At(value = "INVOKE", target="Lnet/minecraft/client/tutorial/TutorialManager;onMovement(Lnet/minecraft/client/input/Input;)V", shift = At.Shift.AFTER,ordinal = 0))
+    @Redirect(method = "tickMovement()V",at = @At(value = "INVOKE",target="Lnet/minecraft/client/network/ClientPlayerEntity;isUsingItem()Z"))
+    public boolean onCheckIsUsingItem(ClientPlayerEntity clientPlayerEntity){
+        return this.isUsingItem() && ((ItemExtension)this.getStackInHand(this.getActiveHand()).getItem()).slowsDownUser();
+    }
+
+    @Inject(method = "tickMovement()V", at = @At(value = "INVOKE", target="Lnet/minecraft/client/tutorial/TutorialManager;onMovement(Lnet/minecraft/client/input/Input;)V", shift = At.Shift.AFTER,ordinal = 0))
     public void tickMovement(CallbackInfo info) {
         /**
         ++this.ticksSinceSprintingChanged;
@@ -131,20 +138,13 @@ public abstract class ClientPlayerEntityMixin extends PlayerEntityMixin {
 
         //ExampleMod.LOGGER.info("ding suff");
         if (((PlayerEntityExtension)this).getAffectedByWeight()) {
-            //ExampleMod.LOGGER.info("ding more suff");
             float weight = ((PlayerInventoryExtension) this.getInventory()).getWeight();
             if (weight < 0 ) {weight *=-1;}
-            //ExampleMod.LOGGER.info("ding more suff" + weight);
-            weight = ((64*9-37) / (weight-37));
-            //ExampleMod.LOGGER.info("ding more suff" + weight);
+            float speedMultiplier = (float) ((640)*2.3/((weight+64)*2.3));
             Input var10000 = this.input;
-            //ExampleMod.LOGGER.info("pervious" + var10000.movementSideways);
-            var10000.movementSideways *= weight;
-            //ExampleMod.LOGGER.info("after" + var10000.movementSideways);
-            var10000 = this.input;
-            //ExampleMod.LOGGER.info("pervious" + var10000.movementForward);
-            var10000.movementForward *= weight;
-            //ExampleMod.LOGGER.info("after" + var10000.movementForward);
+            var10000.movementSideways *= speedMultiplier;
+            var10000 = this.input;;
+            var10000.movementForward *= speedMultiplier;
         }
 
         /**

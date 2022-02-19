@@ -1,6 +1,6 @@
 package net.fabricmc.morgan.mixin.entity;
 
-import net.fabricmc.morgan.entity.effect.StatusEffects;
+import net.fabricmc.morgan.entity.effect.MorganStatusEffects;
 import net.fabricmc.morgan.entity.player.PlayerEntityExtension;
 import net.fabricmc.morgan.item.MorganItems;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -49,6 +49,9 @@ public abstract class ItemEntityMixin extends Entity {
     }
 
 
+    /**
+     * @author Morgan
+     */
     @Overwrite
     public void onPlayerCollision(PlayerEntity player) {
         if (!this.world.isClient) {
@@ -67,7 +70,7 @@ public abstract class ItemEntityMixin extends Entity {
                         Goat.shouldRenderName();
                         Goat.setYaw(player.getYaw());
                         Goat.setPitch(player.getPitch());
-                        Goat.addStatusEffect(new StatusEffectInstance(StatusEffects.GOAT, 100000, 4));
+                        Goat.addStatusEffect(new StatusEffectInstance(MorganStatusEffects.GOAT, 100000, 4));
                         player.giveItemStack(new ItemStack(Items.BEDROCK));
                     }
                 }
