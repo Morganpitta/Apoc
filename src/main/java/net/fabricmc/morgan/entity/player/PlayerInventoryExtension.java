@@ -13,4 +13,6 @@ public interface PlayerInventoryExtension {
     boolean canInsertStack(int slot, ItemStack stack);
 
     float getWeight();
+
+    int getRandomUsedSlot();
 }

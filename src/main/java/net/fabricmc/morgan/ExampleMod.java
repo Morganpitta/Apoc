@@ -23,6 +23,7 @@ public class ExampleMod implements ModInitializer {
     public static final Identifier DEATH_PACKET_ID = new Identifier("morgan", "death");
     public static final Identifier SHEEP_PACKET_ID = new Identifier("morgan", "sheep");
     public static final Identifier WEIGHT_PACKET_ID = new Identifier("morgan", "weight");
+    public static final Identifier FORGETFUL_PACKET_ID = new Identifier("morgan", "forgetful");
     public static final Logger LOGGER = LogManager.getLogger("modid");
     @Override
     public void onInitialize() {

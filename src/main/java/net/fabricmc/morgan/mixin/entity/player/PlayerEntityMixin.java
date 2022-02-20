@@ -17,6 +17,7 @@ import net.minecraft.entity.*;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
@@ -40,6 +41,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -64,6 +66,19 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
     public int tick = 0;
     public int onFireForTicks=0;
     public int fuse=-100;
+
+    public int nextDropItem = this.random.nextInt(10) + 5;
+
+    public boolean isForgetful=true;
+    public boolean getForgetful() {return this.isForgetful;}
+    public void setForgetful(boolean bool) {
+        this.isForgetful=bool;
+        if (!this.world.isClient()) {
+            PacketByteBuf buf = PacketByteBufs.create();
+            buf.writeBoolean(bool);
+            ServerPlayNetworking.send((ServerPlayerEntity) (Object) this, ExampleMod.FORGETFUL_PACKET_ID, buf);
+        }
+    }
 
     public Vec3d deathPos= new Vec3d(0,-255,0);
     public Vec3d getDeathPos(){return this.deathPos;}
@@ -111,7 +126,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
 
     public boolean isSad = false;
 
-    public boolean isAffectedByWeight = true;
+    public boolean isAffectedByWeight = false;
     public boolean getAffectedByWeight(){return this.isAffectedByWeight;}
     public void setAffectedByWeight(boolean bool) {
         this.isAffectedByWeight=bool;
@@ -138,6 +153,10 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
     @Shadow public abstract void addExhaustion(float exhaustion);
     @Shadow public abstract PlayerInventory getInventory();
 
+    @Shadow @Nullable public abstract ItemEntity dropItem(ItemStack stack, boolean retainOwnership);
+
+    @Shadow @Final protected static TrackedData<Byte> PLAYER_MODEL_PARTS;
+
     @Inject(method = "writeCustomDataToNbt",at = @At("HEAD"))
     public void writeCustomDataToNbt(NbtCompound nbt,CallbackInfo info) {
         nbt.putInt("SleepSheep", this.SleepSheep);
@@ -153,11 +172,10 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
 
     @Inject(method = "tick",at = @At("HEAD"))
     public void tick(CallbackInfo info) {
-        /**
-        if (!this.world.isClient()&&tick ==20) {
-            ((PlayerInventoryExtension) this.getInventory()).getWeight();
+        if (--this.nextDropItem<0) {
+            this.dropItem(this.getInventory().getStack(((PlayerInventoryExtension)this.getInventory()).getRandomUsedSlot()),false);
+            this.nextDropItem = this.random.nextInt(10) + 5;
         }
-         **/
         if (this.isOnFire()){
             onFireForTicks++;
             if (onFireForTicks>20&&(this.getInventory().contains(MorganItemTags.EXPLOSIVE))&&fuse<0) {

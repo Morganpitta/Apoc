@@ -1,5 +1,6 @@
 package net.fabricmc.morgan.mixin.entity.player;
 
+import com.google.common.collect.Lists;
 import net.fabricmc.morgan.ExampleMod;
 import net.fabricmc.morgan.entity.player.PlayerInventoryExtension;
 import net.fabricmc.morgan.tag.MorganItemTags;
@@ -9,6 +10,7 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.text.Text;
 import net.minecraft.util.Nameable;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.crash.CrashException;
@@ -18,6 +20,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.List;
+import java.util.Random;
 
 @Mixin(PlayerInventory.class)
 public abstract class PlayerInventoryMixin implements Inventory, Nameable, PlayerInventoryExtension {
@@ -36,8 +39,10 @@ public abstract class PlayerInventoryMixin implements Inventory, Nameable, Playe
     @Shadow public int selectedSlot;
     @Shadow public PlayerEntity player;
     @Shadow private int changeCount;
+    protected final Random random;
 
     protected PlayerInventoryMixin() {
+        this.random = new Random();
     }
 
     @Shadow public abstract int getEmptySlot();
@@ -66,6 +71,22 @@ public abstract class PlayerInventoryMixin implements Inventory, Nameable, Playe
         }
     }
      **/
+
+    public int getRandomUsedSlot(){
+        if (this.combinedInventory.size()==0){
+            return -1;
+        }
+        else{
+            List<Integer> list = Lists.newArrayList();
+            for (int slot = 0;slot<this.combinedInventory.size();++slot){
+                if (!this.combinedInventory.get(slot).isEmpty()){
+                    list.add(slot);
+                }
+            }
+            return list.get(random.nextInt(list.size()));
+        }
+        //this.combinedInventory.get(random.nextInt(this.combinedInventory.size()));
+    }
 
     public float getWeight(){
         float weight=0;

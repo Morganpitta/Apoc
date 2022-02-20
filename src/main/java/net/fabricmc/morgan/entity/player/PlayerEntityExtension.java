@@ -15,4 +15,6 @@ public interface PlayerEntityExtension {
     void setSleepSheep(int sheep);
     boolean getAffectedByWeight();
     void setAffectedByWeight(boolean bool);
+    boolean getForgetful();
+    void setForgetful(boolean bool);
 }
