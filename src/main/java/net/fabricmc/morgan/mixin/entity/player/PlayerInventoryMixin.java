@@ -1,7 +1,6 @@
 package net.fabricmc.morgan.mixin.entity.player;
 
 import com.google.common.collect.Lists;
-import net.fabricmc.morgan.ExampleMod;
 import net.fabricmc.morgan.entity.player.PlayerInventoryExtension;
 import net.fabricmc.morgan.tag.MorganItemTags;
 import net.minecraft.entity.player.PlayerEntity;
@@ -9,8 +8,6 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.text.Text;
 import net.minecraft.util.Nameable;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.crash.CrashException;
@@ -18,6 +15,9 @@ import net.minecraft.util.crash.CrashReport;
 import net.minecraft.util.crash.CrashReportSection;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
 import java.util.Random;
@@ -39,9 +39,10 @@ public abstract class PlayerInventoryMixin implements Inventory, Nameable, Playe
     @Shadow public int selectedSlot;
     @Shadow public PlayerEntity player;
     @Shadow private int changeCount;
-    protected final Random random;
+    protected Random random;
 
-    protected PlayerInventoryMixin() {
+    @Inject(method = "<init>", at = @At("TAIL"))
+    protected void init(PlayerEntity player, CallbackInfo ci) {
         this.random = new Random();
     }
 
