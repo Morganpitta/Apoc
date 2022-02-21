@@ -62,8 +62,6 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
         super(entityType, world);
     }
 
-    private static final UUID WEIGHT_SPEED_ID = UUID.fromString("2f9a3e00-7c2b-4916-9a5b-56804fa6cc91");
-
     public int tick = 0;
     public int onFireForTicks=0;
     public int fuse=-100;
