@@ -68,7 +68,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
 
     public int nextDropItem = this.random.nextInt(6000) + 6000;
 
-    public boolean isForgetful=true;
+    public boolean isForgetful=false;
     public boolean getForgetful() {return this.isForgetful;}
     public void setForgetful(boolean bool) {
         this.isForgetful=bool;
