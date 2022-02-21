@@ -18,6 +18,10 @@ public abstract class EggEntityMixin extends ThrownItemEntity {
         super(entityType, world);
     }
 
+    /**
+     * @author Morgan
+     * @reason explosive eggs
+     */
     @Overwrite
     public void onCollision(HitResult hitResult) {
         super.onCollision(hitResult);

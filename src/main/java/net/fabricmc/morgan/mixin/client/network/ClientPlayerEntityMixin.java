@@ -61,6 +61,7 @@ public abstract class ClientPlayerEntityMixin extends PlayerEntityMixin {
 
     /**
      * @author Morgan
+     * @reason make nausea reverse inputs
      */
     @Overwrite
     public void tickNewAi() {

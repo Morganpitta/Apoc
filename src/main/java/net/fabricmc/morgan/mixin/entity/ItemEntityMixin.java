@@ -44,13 +44,25 @@ public abstract class ItemEntityMixin extends Entity {
     private UUID owner;
 
 
+    @Shadow private int pickupDelay=0;
+
     static {
         STACK = DataTracker.registerData(ItemEntity.class, TrackedDataHandlerRegistry.ITEM_STACK);
+    }
+
+    /**
+     * @author Morgan
+     * @reason trying to make pickup delay default to 0
+     */
+    @Overwrite
+    public void setToDefaultPickupDelay() {
+        this.pickupDelay = 0;
     }
 
 
     /**
      * @author Morgan
+     * @reason goats and bedrock
      */
     @Overwrite
     public void onPlayerCollision(PlayerEntity player) {
@@ -58,7 +70,7 @@ public abstract class ItemEntityMixin extends Entity {
             ItemStack itemStack = this.getStack();
             Item item = itemStack.getItem();
             int i = itemStack.getCount();
-            if ((this.owner == null || this.owner.equals(player.getUuid())) && player.getInventory().insertStack(itemStack)) {
+            if (this.pickupDelay == 0 &&(this.owner == null || this.owner.equals(player.getUuid())) && player.getInventory().insertStack(itemStack)) {
                 player.sendPickup(this, i);
 
                 if (!(player.getStackInHand(Hand.MAIN_HAND).isOf(MorganItems.ITEM_MAGNET)||player.getStackInHand(Hand.OFF_HAND).isOf(MorganItems.ITEM_MAGNET))) {

@@ -3,6 +3,8 @@ package net.fabricmc.morgan.mixin.entity.player;
 import com.google.common.collect.Lists;
 import net.fabricmc.morgan.entity.player.PlayerInventoryExtension;
 import net.fabricmc.morgan.tag.MorganItemTags;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
@@ -51,6 +53,8 @@ public abstract class PlayerInventoryMixin implements Inventory, Nameable, Playe
     @Shadow public abstract int addStack(int slot, ItemStack stack);
     @Shadow public abstract int getOccupiedSlotWithRoomForStack(ItemStack stack);
 
+    @Shadow public abstract ItemStack removeStack(int slot);
+
     /**
     private boolean canStackAddMore(ItemStack existingStack, ItemStack stack) {
         return !existingStack.isEmpty() && ItemStack.canCombine(existingStack, stack) && existingStack.isStackable() && existingStack.getCount() < existingStack.getMaxCount() && existingStack.getCount() < this.getMaxCountPerStack();
@@ -71,21 +75,26 @@ public abstract class PlayerInventoryMixin implements Inventory, Nameable, Playe
             return -1;
         }
     }
-     **/
+     *
+     * @return*/
 
-    public int getRandomUsedSlot(){
-        if (this.combinedInventory.size()==0){
-            return -1;
-        }
-        else{
+    public void dropRandomUsedSlot(){
             List<Integer> list = Lists.newArrayList();
-            for (int slot = 0;slot<this.combinedInventory.size();++slot){
-                if (!this.combinedInventory.get(slot).isEmpty()){
+            for(int slot = 0; slot < this.size(); ++slot) {
+                ItemStack itemStack = this.getStack(slot);
+                if (!itemStack.isEmpty()) {
                     list.add(slot);
                 }
             }
-            return list.get(random.nextInt(list.size()));
-        }
+            if (!(list.size() == 0)) {
+                int slot = list.get(random.nextInt(list.size()));
+                ItemEntity entity = this.player.dropItem(this.getStack(slot), true, false);
+                if (entity != null) {
+                    entity.setPickupDelay(100);
+                }
+                this.removeStack(slot);
+            }
+
         //this.combinedInventory.get(random.nextInt(this.combinedInventory.size()));
     }
 

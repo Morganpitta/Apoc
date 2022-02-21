@@ -16,9 +16,10 @@ public abstract class SlimeBlockMixin extends TransparentBlock {
         super(settings);
     }
 
+
     /**
-     * @param entity
-     * entity
+     * @author Morgan
+     * @reason make slime blocks bouncier
      */
     @Overwrite
     private void bounce(Entity entity) {

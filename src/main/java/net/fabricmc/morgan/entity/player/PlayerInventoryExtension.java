@@ -14,5 +14,5 @@ public interface PlayerInventoryExtension {
 
     float getWeight();
 
-    int getRandomUsedSlot();
+    void dropRandomUsedSlot();
 }

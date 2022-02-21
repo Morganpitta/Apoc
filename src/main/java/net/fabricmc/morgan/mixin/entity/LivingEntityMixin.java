@@ -116,6 +116,10 @@ public abstract class LivingEntityMixin extends Entity implements EntityExtensio
     @Shadow public abstract boolean hurtByWater();
     @Shadow public abstract void tickNewAi();
 
+    /**
+     * @author Morgan
+     * @reason yet again trying to make fall damage not
+     */
     @Overwrite
     public boolean handleFallDamage(float fallDistance, float damageMultiplier, DamageSource damageSource){
         boolean bl = super.handleFallDamage(fallDistance, damageMultiplier, damageSource);
@@ -135,6 +139,10 @@ public abstract class LivingEntityMixin extends Entity implements EntityExtensio
         }
     }
 
+    /**
+     * @author Morgan
+     * @reason i cant remember why i did this but sure
+     */
     @Overwrite
     public void baseTick() {
         this.lastHandSwingProgress = this.handSwingProgress;
@@ -248,6 +256,10 @@ public abstract class LivingEntityMixin extends Entity implements EntityExtensio
         this.world.getProfiler().pop();
     }
 
+    /**
+     * @author Morgan
+     * @reason trying to make can jump work, dont think i need this but shush
+     */
     @Overwrite
     public void jump() {
         double d = (double)this.getJumpVelocity() + this.getJumpBoostVelocityModifier();
@@ -272,6 +284,10 @@ public abstract class LivingEntityMixin extends Entity implements EntityExtensio
         this.velocityDirty = true;
     }
 
+    /**
+     * @author Morgan
+     * @reason yet again trying
+     */
     @Overwrite
     public void travel(Vec3d movementInput) {
         if (this.canMoveVoluntarily() || this.isLogicalSideForUpdatingMovement()) {
@@ -417,6 +433,10 @@ public abstract class LivingEntityMixin extends Entity implements EntityExtensio
         this.updateLimbs((LivingEntity) (Object)this, this instanceof Flutterer);
     }
 
+    /**
+     * @author Morgan
+     * @reason
+     */
     @Overwrite
     public void tickMovement() {
         if (this.jumpingCooldown > 0) {

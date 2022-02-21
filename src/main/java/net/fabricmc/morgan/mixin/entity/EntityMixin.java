@@ -174,6 +174,10 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
         this.setBouncy(nbt.getBoolean("IsBouncy"));
     }
 
+    /**
+     * @author Morgan
+     * @reason change stuff to make bouncy
+     */
     @Overwrite
     public void move(MovementType movementType, Vec3d movement) {
         if (this.noClip) {
@@ -324,6 +328,10 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
     }
 
 
+    /**
+     * @author Morgan
+     * @reason trying to not make fall damage when bouncy, idk if actually works
+     */
     @Overwrite
     public void fall(double heightDifference, boolean onGround, BlockState landedState, BlockPos landedPosition) {
         if (onGround) {
@@ -348,6 +356,10 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
         }
     }
 
+    /**
+     * @author Morgan
+     * @reason uncapped movement speed so i can make weight thingy
+     */
     @Overwrite
     private static Vec3d movementInputToVelocity(Vec3d movementInput, float speed, float yaw) {
         double d = movementInput.lengthSquared();

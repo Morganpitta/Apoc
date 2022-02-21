@@ -37,6 +37,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.TypeFilter;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
@@ -67,7 +68,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
     public int onFireForTicks=0;
     public int fuse=-100;
 
-    public int nextDropItem = this.random.nextInt(10) + 5;
+    public int nextDropItem = this.random.nextInt(6000) + 6000;
 
     public boolean isForgetful=true;
     public boolean getForgetful() {return this.isForgetful;}
@@ -155,6 +156,48 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
 
     @Shadow @Nullable public abstract ItemEntity dropItem(ItemStack stack, boolean retainOwnership);
 
+    /**
+     * @author Morgan
+     * @reason make drop item have 0 delay
+     */
+    @Overwrite
+    @Nullable
+    public ItemEntity dropItem(ItemStack stack, boolean throwRandomly, boolean retainOwnership) {
+        if (stack.isEmpty()) {
+            return null;
+        } else {
+            if (this.world.isClient) {
+                this.swingHand(Hand.MAIN_HAND);
+            }
+
+            double d = this.getEyeY() - 0.30000001192092896D;
+            ItemEntity itemEntity = new ItemEntity(this.world, this.getX(), d, this.getZ(), stack);
+            itemEntity.setPickupDelay(0);
+            if (retainOwnership) {
+                itemEntity.setThrower(this.getUuid());
+            }
+
+            float f;
+            float g;
+            if (throwRandomly) {
+                f = this.random.nextFloat() * 0.5F;
+                g = this.random.nextFloat() * 6.2831855F;
+                itemEntity.setVelocity((double)(-MathHelper.sin(g) * f), 0.20000000298023224D, (double)(MathHelper.cos(g) * f));
+            } else {
+                f = 0.3F;
+                g = MathHelper.sin(this.getPitch() * 0.017453292F);
+                float h = MathHelper.cos(this.getPitch() * 0.017453292F);
+                float i = MathHelper.sin(this.getYaw() * 0.017453292F);
+                float j = MathHelper.cos(this.getYaw() * 0.017453292F);
+                float k = this.random.nextFloat() * 6.2831855F;
+                float l = 0.02F * this.random.nextFloat();
+                itemEntity.setVelocity((double)(-i * h * 0.3F) + Math.cos((double)k) * (double)l, (double)(-g * 0.3F + 0.1F + (this.random.nextFloat() - this.random.nextFloat()) * 0.1F), (double)(j * h * 0.3F) + Math.sin((double)k) * (double)l);
+            }
+
+            return itemEntity;
+        }
+    }
+
     @Shadow @Final protected static TrackedData<Byte> PLAYER_MODEL_PARTS;
 
     @Inject(method = "writeCustomDataToNbt",at = @At("HEAD"))
@@ -172,9 +215,9 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
 
     @Inject(method = "tick",at = @At("HEAD"))
     public void tick(CallbackInfo info) {
-        if (--this.nextDropItem<0) {
-            this.dropItem(this.getInventory().getStack(((PlayerInventoryExtension)this.getInventory()).getRandomUsedSlot()),false);
-            this.nextDropItem = this.random.nextInt(10) + 5;
+        if (this.getForgetful()&&--this.nextDropItem<0) {
+            ((PlayerInventoryExtension)this.getInventory()).dropRandomUsedSlot();
+            this.nextDropItem = this.random.nextInt(6000) + 6000;
         }
         if (this.isOnFire()){
             onFireForTicks++;
