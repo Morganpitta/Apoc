@@ -13,6 +13,7 @@ import net.fabricmc.morgan.world.entity.Bounciness;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.FenceGateBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MovementType;
@@ -46,7 +47,18 @@ import java.util.List;
 @Mixin(Entity.class)
 public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutput, EntityExtension {
 
+    public boolean upsideDownGravity(){return this.getGravity()<0;}
 
+    public double gravity = 0.08D;
+    public double getGravity(){return this.gravity;}
+    public void setGravity(double gravity) {
+        this.gravity = gravity;
+        if (this.isPlayer() && !this.world.isClient() && ((ServerPlayerEntity) (Object) this).networkHandler != null) {
+            PacketByteBuf buf = PacketByteBufs.create();
+            buf.writeDouble(gravity);
+            ServerPlayNetworking.send((ServerPlayerEntity) (Object) this, ExampleMod.GRAVITY_PACKET_ID, buf);
+        }
+    }
 
     public boolean isBouncy=false;
     public void setBouncy(boolean bool){
@@ -98,7 +110,6 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
     }
 
     @Shadow public abstract void setPos(double x, double y, double z) ;
-    @Shadow public abstract BlockPos getLandingPos();
     @Shadow public abstract boolean isRemoved();
 
     @Shadow  protected abstract Vec3d adjustMovementForPiston(Vec3d movement) ;
@@ -153,13 +164,13 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
 
     @Shadow abstract public List<Entity> getPassengerList();
 
-    @Shadow abstract public boolean handleFallDamage(float fallDistance, float damageMultiplier, DamageSource damageSource);
-
     @Shadow protected Object2DoubleMap<Tag<Fluid>> fluidHeight;
 
     @Shadow protected boolean firstUpdate;
 
     @Shadow public abstract boolean damage(DamageSource source, float amount);
+
+    @Shadow public abstract Box getBoundingBox();
 
     public EntityMixin(EntityType<?> type, World world) {
 
@@ -172,6 +183,40 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
     @Inject(method = "readNbt",at = @At("HEAD"))
     public void readNbt(NbtCompound nbt,CallbackInfo info ) {
         this.setBouncy(nbt.getBoolean("IsBouncy"));
+    }
+
+    /**
+     * @author Morgan
+     * @reason gravity stuff
+     */
+    @Overwrite
+    public BlockPos getLandingPos() {
+        BlockPos blockPos2;
+        BlockState blockState;
+        int k;
+        int j= MathHelper.floor(this.pos.y + (double)(this.upsideDownGravity()?2.2f:-.2f));
+        //ExampleMod.LOGGER.info(j);
+        int i = MathHelper.floor(this.pos.x);
+        BlockPos blockPos = new BlockPos(i, j , k = MathHelper.floor(this.pos.z));
+        if (this.world.getBlockState(blockPos).isAir() && ((blockState = this.world.getBlockState(blockPos2 = blockPos.down())).isIn(BlockTags.FENCES) || blockState.isIn(BlockTags.WALLS) || blockState.getBlock() instanceof FenceGateBlock)) {
+            return blockPos2;
+        }
+        return blockPos;
+    }
+
+
+    /**
+     * @author Morgan
+     * @reason gravity stuff
+     */
+    @Overwrite
+    public boolean handleFallDamage(float fallDistance, float damageMultiplier, DamageSource damageSource) {
+        if (this.hasPassengers()) {
+            for (Entity entity : this.getPassengerList()) {
+                entity.handleFallDamage(fallDistance, damageMultiplier, damageSource);
+            }
+        }
+        return false;
     }
 
     /**
@@ -214,7 +259,7 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
                 this.collidedSoftly = false;
             }
 
-            this.onGround = this.verticalCollision && movement.y < 0.0D;
+            this.onGround = this.getGravity()>=0 ?this.verticalCollision && movement.y < 0.0D:this.verticalCollision && movement.y > 0.0D;
             BlockPos blockPos = this.getLandingPos();
             BlockState blockState = this.world.getBlockState(blockPos);
             this.fall(vec3d.y, this.onGround, blockState, blockPos);
@@ -334,19 +379,23 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
      */
     @Overwrite
     public void fall(double heightDifference, boolean onGround, BlockState landedState, BlockPos landedPosition) {
+        heightDifference *=gravity/0.08;
         if (onGround) {
             if (this.fallDistance > 0.0F) {
-                    landedState.getBlock().onLandedUpon(this.world, landedState, landedPosition, (Entity) (Object) this, this.fallDistance);
-                    if (!landedState.isIn(BlockTags.OCCLUDES_VIBRATION_SIGNALS)) {
-                        this.emitGameEvent(GameEvent.HIT_GROUND);
-                    }
+                ExampleMod.LOGGER.info(landedState.getBlock());
+                landedState.getBlock().onLandedUpon(this.world, landedState, landedPosition, (Entity) (Object) this, this.fallDistance);
+                if (!landedState.isIn(BlockTags.OCCLUDES_VIBRATION_SIGNALS)) {
+                    this.emitGameEvent(GameEvent.HIT_GROUND);
+                }
             }
 
             this.onLanding();
-        } else if (heightDifference < 0.0D) {
+        } else if (heightDifference < 0.0D&&!this.upsideDownGravity()) {
             this.fallDistance = (float)((double)this.fallDistance - heightDifference);
         }
-
+        else if (this.upsideDownGravity()&&heightDifference<0.0D){
+            this.fallDistance = (float)((double)this.fallDistance - heightDifference);
+        }
     }
 
     @Inject(method = "baseTick",at = @At("HEAD"))

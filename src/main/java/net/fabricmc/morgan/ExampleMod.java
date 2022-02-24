@@ -24,6 +24,9 @@ public class ExampleMod implements ModInitializer {
     public static final Identifier SHEEP_PACKET_ID = new Identifier("morgan", "sheep");
     public static final Identifier WEIGHT_PACKET_ID = new Identifier("morgan", "weight");
     public static final Identifier FORGETFUL_PACKET_ID = new Identifier("morgan", "forgetful");
+    public static final Identifier GRAVITY_PACKET_ID = new Identifier("morgan", "gravity");
+    public static final Identifier RENDER_UPSIDE_DOWN_PACKET_ID = new Identifier("morgan", "render_upside_down");
+    public static final Identifier UPSIDE_DOWN_PACKET_ID = new Identifier("morgan", "upside_down");
     public static final Logger LOGGER = LogManager.getLogger("modid");
     @Override
     public void onInitialize() {
