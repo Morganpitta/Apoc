@@ -383,6 +383,7 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
         if (onGround) {
             if (this.fallDistance > 0.0F) {
                 ExampleMod.LOGGER.info(landedState.getBlock());
+                ExampleMod.LOGGER.info(fallDistance);
                 landedState.getBlock().onLandedUpon(this.world, landedState, landedPosition, (Entity) (Object) this, this.fallDistance);
                 if (!landedState.isIn(BlockTags.OCCLUDES_VIBRATION_SIGNALS)) {
                     this.emitGameEvent(GameEvent.HIT_GROUND);

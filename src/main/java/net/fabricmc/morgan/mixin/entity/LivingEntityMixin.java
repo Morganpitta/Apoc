@@ -69,6 +69,8 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityEx
         }
     }
 
+    @Shadow public abstract boolean damage(DamageSource source, float amount);
+
     @Shadow public float lastHandSwingProgress;
     @Shadow public float handSwingProgress;
 
@@ -149,6 +151,8 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityEx
 
     @Shadow public abstract boolean isHoldingOntoLadder();
 
+    @Shadow protected abstract void applyDamage(DamageSource source, float amount);
+
     /**
      * @author Morgan
      * @reason yet again trying to make fall damage not
@@ -160,11 +164,14 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityEx
             return false;
         }
         else {
+            ExampleMod.LOGGER.info("doing fall damamge stufs");
             int i = this.computeFallDamage(fallDistance, damageMultiplier);
+            ExampleMod.LOGGER.info(i);
             if (i > 0) {
+                ExampleMod.LOGGER.info("yes");
                 this.playSound(this.getFallSound(i), 1.0F, 1.0F);
                 this.playBlockFallSound();
-                this.damage(damageSource, (float) i);
+                ExampleMod.LOGGER.info(this.damage(damageSource, (float) i));
                 return true;
             } else {
                 return bl;
