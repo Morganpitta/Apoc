@@ -9,9 +9,11 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.morgan.ExampleMod;
 import net.fabricmc.morgan.entity.EntityExtension;
+import net.fabricmc.morgan.entity.LivingEntityExtension;
 import net.fabricmc.morgan.entity.player.PlayerEntityExtension;
 import net.fabricmc.morgan.entity.player.PlayerInventoryExtension;
 import net.fabricmc.morgan.item.MorganItems;
+import net.fabricmc.morgan.mixin.entity.LivingEntityMixin;
 import net.fabricmc.morgan.tag.MorganItemTags;
 import net.minecraft.entity.*;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
@@ -61,8 +63,6 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
     protected PlayerEntityMixin(EntityType<? extends LivingEntity> entityType, World world) {
         super(entityType, world);
     }
-
-    private static final UUID WEIGHT_SPEED_ID = UUID.fromString("2f9a3e00-7c2b-4916-9a5b-56804fa6cc91");
 
     public int tick = 0;
     public int onFireForTicks=0;
@@ -215,6 +215,9 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
 
     @Inject(method = "tick",at = @At("HEAD"))
     public void tick(CallbackInfo info) {
+        if (!((LivingEntityExtension)this).getUpsideDown()){
+            ((LivingEntityExtension)this).setUpsideDown(true);
+        }
         if (this.getForgetful()&&--this.nextDropItem<0) {
             ((PlayerInventoryExtension)this.getInventory()).dropRandomUsedSlot();
             this.nextDropItem = this.random.nextInt(6000) + 6000;
@@ -237,14 +240,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
         if (this.isSad){
             giveUpAndDie();
         }
-        if ((Objects.equals(this.getEntityName(), "Zenxuss") || Objects.equals(this.getEntityName(), "alex_2772"))&&!this.getBlind()) {
-            this.setBlind(true);
-        }
-
-        if ((Objects.equals(this.getEntityName(), "Slic_e"))&&!this.getBlind()) {
-            this.setAffectedByWeight(true);
-        }
-
+        this.checkPlayerDisabilities();
         if (this.isSleeping()&&!this.world.isClient)
         {
             SleepSheep=SleepSheep+1;
@@ -305,6 +301,20 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
         tick++;
         if (tick >20){
             tick = 0;
+        }
+    }
+
+    public void checkPlayerDisabilities(){
+        if ((Objects.equals(this.getEntityName(), "Zenxuss") || Objects.equals(this.getEntityName(), "alex_2772"))&&!this.getBlind()) {
+            this.setBlind(true);
+        }
+
+        if ((Objects.equals(this.getEntityName(), "Slic_e"))&&!this.getBlind()) {
+            this.setAffectedByWeight(true);
+        }
+
+        if ((Objects.equals(this.getEntityName(), "MagmaStan"))&&!((LivingEntityExtension)this).getUpsideDown()) {
+            ((LivingEntityExtension)this).setUpsideDown(true);
         }
     }
 

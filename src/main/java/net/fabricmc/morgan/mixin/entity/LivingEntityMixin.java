@@ -1,8 +1,11 @@
 package net.fabricmc.morgan.mixin.entity;
 
 import com.google.common.base.Objects;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.morgan.ExampleMod;
 import net.fabricmc.morgan.entity.EntityExtension;
+import net.fabricmc.morgan.entity.LivingEntityExtension;
 import net.fabricmc.morgan.entity.player.PlayerEntityExtension;
 import net.minecraft.block.Blocks;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -15,6 +18,7 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundEvent;
@@ -34,11 +38,38 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.Optional;
 
 @Mixin(LivingEntity.class)
-public abstract class LivingEntityMixin extends Entity implements EntityExtension{
+public abstract class LivingEntityMixin extends Entity implements LivingEntityExtension {
     public LivingEntityMixin(EntityType<?> type, World world) {
         super(type, world);
     }
 
+    public boolean upsideDown = false;
+    public boolean getUpsideDown(){return this.getRenderUpsideDown()&&((EntityExtension)this).getGravity()!=0.08D&&this.upsideDown;}
+    public void setUpsideDown(boolean upsideDown) {
+        this.upsideDown = upsideDown;
+        this.setRenderUpsideDown(upsideDown);
+        if(!(((EntityExtension)this).getGravity()==-0.08D)){
+            ((EntityExtension)this).setGravity(-0.08D);
+        }
+        if (this.isPlayer() && !this.world.isClient() && ((ServerPlayerEntity) (Object) this).networkHandler != null) {
+            PacketByteBuf buf = PacketByteBufs.create();
+            buf.writeBoolean(upsideDown);
+            ServerPlayNetworking.send((ServerPlayerEntity) (Object) this, ExampleMod.UPSIDE_DOWN_PACKET_ID, buf);
+        }
+    }
+
+    public boolean renderUpsideDown = false;
+    public boolean getRenderUpsideDown(){return this.renderUpsideDown;}
+    public void setRenderUpsideDown(boolean renderUpsideDown) {
+        this.renderUpsideDown = renderUpsideDown;
+        if (this.isPlayer() && !this.world.isClient() && ((ServerPlayerEntity) (Object) this).networkHandler != null) {
+            PacketByteBuf buf = PacketByteBufs.create();
+            buf.writeBoolean(renderUpsideDown);
+            ServerPlayNetworking.send((ServerPlayerEntity) (Object) this, ExampleMod.RENDER_UPSIDE_DOWN_PACKET_ID, buf);
+        }
+    }
+
+    @Shadow public abstract boolean damage(DamageSource source, float amount);
 
     @Shadow public float lastHandSwingProgress;
     @Shadow public float handSwingProgress;
@@ -52,9 +83,11 @@ public abstract class LivingEntityMixin extends Entity implements EntityExtensio
     @Shadow abstract public Optional<BlockPos> getSleepingPosition();
     @Shadow abstract void setPositionInBed(BlockPos pos);
     @Shadow abstract public boolean shouldDisplaySoulSpeedEffects();
-    @Shadow abstract void displaySoulSpeedEffects();
+    @Shadow
+    protected abstract void displaySoulSpeedEffects();
     @Shadow abstract public boolean canBreatheInWater();
-    @Shadow abstract int getNextAirUnderwater(int air);
+    @Shadow
+    protected abstract int getNextAirUnderwater(int air);
     @Shadow abstract int getNextAirOnLand(int air);
     @Shadow BlockPos lastBlockPos;
     @Shadow abstract void applyMovementEffects(BlockPos pos);
@@ -116,6 +149,10 @@ public abstract class LivingEntityMixin extends Entity implements EntityExtensio
     @Shadow public abstract boolean hurtByWater();
     @Shadow public abstract void tickNewAi();
 
+    @Shadow public abstract boolean isHoldingOntoLadder();
+
+    @Shadow protected abstract void applyDamage(DamageSource source, float amount);
+
     /**
      * @author Morgan
      * @reason yet again trying to make fall damage not
@@ -123,21 +160,50 @@ public abstract class LivingEntityMixin extends Entity implements EntityExtensio
     @Overwrite
     public boolean handleFallDamage(float fallDistance, float damageMultiplier, DamageSource damageSource){
         boolean bl = super.handleFallDamage(fallDistance, damageMultiplier, damageSource);
-        if(getBouncy()){
+        if(((EntityExtension)this).getBouncy()){
             return false;
         }
         else {
+            ExampleMod.LOGGER.info("doing fall damamge stufs");
             int i = this.computeFallDamage(fallDistance, damageMultiplier);
+            ExampleMod.LOGGER.info(i);
             if (i > 0) {
+                ExampleMod.LOGGER.info("yes");
                 this.playSound(this.getFallSound(i), 1.0F, 1.0F);
                 this.playBlockFallSound();
-                this.damage(damageSource, (float) i);
+                ExampleMod.LOGGER.info(this.damage(damageSource, (float) i));
                 return true;
             } else {
                 return bl;
             }
         }
     }
+
+    /**
+     * @author Morgan
+     * @reason Upside down agggh
+     */
+    @Overwrite
+    private Vec3d applyClimbingSpeed(Vec3d motion) {
+        if (this.isClimbing()) {
+            this.onLanding();
+            float f = 0.15f;
+            double d = MathHelper.clamp(motion.x, (double)-0.15f, (double)0.15f);
+            double e = MathHelper.clamp(motion.z, (double)-0.15f, (double)0.15f);
+            double g = Math.max(motion.y, (double)-0.15f);
+            if (g < 0.0 && !this.getBlockStateAtPos().isOf(Blocks.SCAFFOLDING) && this.isHoldingOntoLadder() && (LivingEntity)(Object)this instanceof PlayerEntity) {
+                g = 0.0;
+            }
+            if (((EntityExtension)this).getGravity()<0){
+                motion = new Vec3d(d, -g, e);
+            }
+            else {
+                motion = new Vec3d(d, g, e);
+            }
+        }
+        return motion;
+    }
+
 
     /**
      * @author Morgan
@@ -264,8 +330,9 @@ public abstract class LivingEntityMixin extends Entity implements EntityExtensio
     public void jump() {
         double d = (double)this.getJumpVelocity() + this.getJumpBoostVelocityModifier();
         Vec3d vec3d = this.getVelocity();
+        if (((EntityExtension)this).getGravity()<0){d*=-1;}
         if (this.isPlayer()) {
-            if (((PlayerEntityExtension) this).getJump()) {
+            if (((PlayerEntityExtension) this).getJump()||((EntityExtension)this).getGravity()<0) {
                 this.setVelocity(vec3d.x, d, vec3d.z);
                 if (this.isSprinting()) {
                     float f = this.getYaw() * 0.017453292F;
@@ -291,10 +358,10 @@ public abstract class LivingEntityMixin extends Entity implements EntityExtensio
     @Overwrite
     public void travel(Vec3d movementInput) {
         if (this.canMoveVoluntarily() || this.isLogicalSideForUpdatingMovement()) {
-            double d = 0.08D;
+            double d = ((EntityExtension)this).getGravity();
             boolean bl = this.getVelocity().y <= 0.0D;
             if (bl && this.hasStatusEffect(StatusEffects.SLOW_FALLING)) {
-                d = 0.01D;
+                d /= 8;
                 this.onLanding();
             }
 
@@ -393,7 +460,7 @@ public abstract class LivingEntityMixin extends Entity implements EntityExtensio
                     double l = vec3d - k;
                     float m = (float)(l * 10.0D - 3.0D);
                     if (m > 0.0F) {
-                        if (!this.getBouncy()) {
+                        if (!((EntityExtension)this).getBouncy()) {
                             this.playSound(this.getFallSound((int) m), 1.0F, 1.0F);
                             this.damage(DamageSource.FLY_INTO_WALL, m);
                         }

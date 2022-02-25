@@ -8,10 +8,13 @@ import net.fabricmc.fabric.api.client.render.fluid.v1.SimpleFluidRenderHandler;
 import net.fabricmc.fabric.api.event.client.ClientSpriteRegistryCallback;
 import net.fabricmc.morgan.block.MorganBlocks;
 import net.fabricmc.morgan.entity.EntityExtension;
+import net.fabricmc.morgan.entity.LivingEntityExtension;
 import net.fabricmc.morgan.entity.player.PlayerEntityExtension;
 import net.fabricmc.morgan.fluid.MorganFluids;
+import net.fabricmc.morgan.mixin.entity.LivingEntityMixin;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -109,6 +112,32 @@ public class ExampleModClient implements ClientModInitializer {
             client.execute(() -> {
                 // Everything in this lambda is run on the render thread
                 ((PlayerEntityExtension)client.player).setForgetful(bool);
+            });
+        });
+
+        //Gravity stuff
+        ClientPlayNetworking.registerGlobalReceiver(ExampleMod.GRAVITY_PACKET_ID, (client, handler, buf, responseSender) -> {
+            double d = buf.readDouble();
+            client.execute(() -> {
+                // Everything in this lambda is run on the render thread
+                ((EntityExtension)client.player).setGravity(d);
+            });
+        });
+
+        //Render Upside Down stuff
+        ClientPlayNetworking.registerGlobalReceiver(ExampleMod.RENDER_UPSIDE_DOWN_PACKET_ID, (client, handler, buf, responseSender) -> {
+            boolean bool = buf.readBoolean();
+            client.execute(() -> {
+                // Everything in this lambda is run on the render thread
+                ((LivingEntityExtension)client.player).setRenderUpsideDown(bool);
+            });
+        });
+        //Upside Down stuff
+        ClientPlayNetworking.registerGlobalReceiver(ExampleMod.UPSIDE_DOWN_PACKET_ID, (client, handler, buf, responseSender) -> {
+            boolean bool = buf.readBoolean();
+            client.execute(() -> {
+                // Everything in this lambda is run on the render thread
+                ((LivingEntityExtension)client.player).setUpsideDown(bool);
             });
         });
 
