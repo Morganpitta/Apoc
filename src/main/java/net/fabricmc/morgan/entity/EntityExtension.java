@@ -6,5 +6,6 @@ public interface EntityExtension {
     void setBouncy(boolean bool);
     double getGravity();
     void setGravity(double gravity);
+    boolean upsideDownGravity();
 }
 

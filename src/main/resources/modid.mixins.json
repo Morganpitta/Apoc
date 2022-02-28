@@ -11,6 +11,7 @@
     "block.GrassBlockMixin",
     "block.SlimeBlockMixin",
     "client.network.ClientPlayerEntityMixin",
+    "client.render.CameraMixin",
     "client.render.entity.LivingEntityRendererMixin",
     "client.render.entity.PlayerEntityRendererMixin",
     "entity.EntityMixin",

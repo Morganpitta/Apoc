@@ -59,7 +59,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Mixin(PlayerEntity.class)
-public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEntityExtension, EntityExtension {
+public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEntityExtension {
     protected PlayerEntityMixin(EntityType<? extends LivingEntity> entityType, World world) {
         super(entityType, world);
     }
@@ -199,6 +199,10 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
     }
 
     @Shadow @Final protected static TrackedData<Byte> PLAYER_MODEL_PARTS;
+
+    @Shadow protected abstract boolean clipAtLedge();
+
+    @Shadow protected abstract boolean method_30263();
 
     @Inject(method = "writeCustomDataToNbt",at = @At("HEAD"))
     public void writeCustomDataToNbt(NbtCompound nbt,CallbackInfo info) {
@@ -340,5 +344,68 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
             this.setJump(true);
         }
         //ExampleMod.LOGGER.info(String.valueOf(Text.of("setting can jump to: "+this.CanJump+ " for: "+this)), false);
+    }
+
+    /**
+     * @author Morgan
+     * @reason sneaking upside down
+     */
+    @Overwrite
+    public Vec3d adjustMovementForSneaking(Vec3d movement, MovementType type) {
+        if (!this.abilities.flying && (type == MovementType.SELF || type == MovementType.PLAYER) && this.clipAtLedge() && this.method_30263()) {
+            double d = movement.x;
+            double e = movement.z;
+            double y = ((EntityExtension)this).upsideDownGravity() ?(double)(1+this.stepHeight):(double)(-this.stepHeight);
+            double var7 = 0.05D;
+
+            while(true) {
+                while(d != 0.0D && this.world.isSpaceEmpty(this, this.getBoundingBox().offset(d, y, 0.0D))) {
+                    if (d < 0.05D && d >= -0.05D) {
+                        d = 0.0D;
+                    } else if (d > 0.0D) {
+                        d -= 0.05D;
+                    } else {
+                        d += 0.05D;
+                    }
+                }
+
+                while(true) {
+                    while(e != 0.0D && this.world.isSpaceEmpty(this, this.getBoundingBox().offset(0.0D, y, e))) {
+                        if (e < 0.05D && e >= -0.05D) {
+                            e = 0.0D;
+                        } else if (e > 0.0D) {
+                            e -= 0.05D;
+                        } else {
+                            e += 0.05D;
+                        }
+                    }
+
+                    while(true) {
+                        while(d != 0.0D && e != 0.0D && this.world.isSpaceEmpty(this, this.getBoundingBox().offset(d, y, e))) {
+                            if (d < 0.05D && d >= -0.05D) {
+                                d = 0.0D;
+                            } else if (d > 0.0D) {
+                                d -= 0.05D;
+                            } else {
+                                d += 0.05D;
+                            }
+
+                            if (e < 0.05D && e >= -0.05D) {
+                                e = 0.0D;
+                            } else if (e > 0.0D) {
+                                e -= 0.05D;
+                            } else {
+                                e += 0.05D;
+                            }
+                        }
+
+                        movement = new Vec3d(d, movement.y, e);
+                        return movement;
+                    }
+                }
+            }
+        } else {
+            return movement;
+        }
     }
 }

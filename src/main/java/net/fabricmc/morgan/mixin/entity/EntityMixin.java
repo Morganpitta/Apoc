@@ -14,9 +14,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.FenceGateBlock;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.MovementType;
+import net.minecraft.entity.*;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
@@ -221,6 +219,17 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
 
     /**
      * @author Morgan
+     * @reason gravity stuff
+     */
+    @Overwrite
+    public BlockPos getVelocityAffectingPos() {
+        double y = (double) ( this.upsideDownGravity()? this.getBoundingBox().maxY + 0.5000001:this.getBoundingBox().minY - 0.5000001);
+        return new BlockPos(this.pos.x, y, this.pos.z);
+    }
+
+
+    /**
+     * @author Morgan
      * @reason change stuff to make bouncy
      */
     @Overwrite
@@ -242,7 +251,7 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
                 this.movementMultiplier = Vec3d.ZERO;
                 this.setVelocity(Vec3d.ZERO);
             }
-
+            this.onGround = this.getGravity()>=0 ?this.verticalCollision && movement.y < 0.0D:this.verticalCollision && movement.y > 0.0D;
             movement = this.adjustMovementForSneaking(movement, movementType);
             Vec3d vec3d = this.adjustMovementForCollisions(movement);
             if (vec3d.lengthSquared() > 1.0E-7D) {
