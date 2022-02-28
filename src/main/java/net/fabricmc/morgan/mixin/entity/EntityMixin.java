@@ -170,6 +170,14 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
 
     @Shadow public abstract Box getBoundingBox();
 
+    @Shadow public double prevY;
+
+    @Shadow public abstract float getStandingEyeHeight();
+
+    @Shadow public double prevZ;
+
+    @Shadow public double prevX;
+
     public EntityMixin(EntityType<?> type, World world) {
 
     }
@@ -225,6 +233,19 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
     public BlockPos getVelocityAffectingPos() {
         double y = (double) ( this.upsideDownGravity()? this.getBoundingBox().maxY + 0.5000001:this.getBoundingBox().minY - 0.5000001);
         return new BlockPos(this.pos.x, y, this.pos.z);
+    }
+
+    /**
+     * @author Morgan
+     * @reason gravity stuff
+     */
+    @Overwrite
+    public final Vec3d getCameraPosVec(float tickDelta) {
+        double d = MathHelper.lerp((double)tickDelta, this.prevX, this.getX());
+        double e = MathHelper.lerp((double)tickDelta, this.prevY, this.getY()) + (this.upsideDownGravity() ? 2 - (double)this.getStandingEyeHeight():(double)this.getStandingEyeHeight());
+        //if ((Entity)(Object)this instanceof PlayerEntity) {((PlayerEntity) (Object)this).sendMessage(Text.of(String.valueOf(this.getStandingEyeHeight())),false);};
+        double f = MathHelper.lerp((double)tickDelta, this.prevZ, this.getZ());
+        return new Vec3d(d, e, f);
     }
 
 
