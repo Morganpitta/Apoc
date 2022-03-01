@@ -16,6 +16,7 @@ public abstract class ItemMixin implements ItemConvertible, ItemExtension {
         return true;
     }
 
+    @Mixin(Item.Settings.class)
     public static class Settings implements ItemSettingsExtension {
         float weight=1;
         public Item.Settings weight(float weight) {

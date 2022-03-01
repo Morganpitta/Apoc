@@ -1,5 +1,6 @@
 package net.fabricmc.morgan.mixin.client.network;
 
+import net.fabricmc.morgan.entity.EntityExtension;
 import net.fabricmc.morgan.entity.player.PlayerEntityExtension;
 import net.fabricmc.morgan.entity.player.PlayerInventoryExtension;
 import net.fabricmc.morgan.item.ItemExtension;
@@ -72,6 +73,12 @@ public abstract class ClientPlayerEntityMixin extends PlayerEntityMixin {
             this.lastRenderPitch = this.renderPitch;
             if (this.hasStatusEffect(StatusEffects.NAUSEA)) {
                 this.sidewaysSpeed = -this.input.movementSideways;
+                this.forwardSpeed = -this.input.movementForward;
+                this.renderPitch = (float) ((double) this.renderPitch + (double) (this.getPitch() - this.renderPitch) * 0.5D);
+                this.renderYaw = (float) ((double) this.renderYaw + (double) (this.getYaw() - this.renderYaw) * 0.5D);
+            }
+            else if(((EntityExtension)this).upsideDownGravity()){
+                this.sidewaysSpeed = this.input.movementSideways;
                 this.forwardSpeed = -this.input.movementForward;
                 this.renderPitch = (float) ((double) this.renderPitch + (double) (this.getPitch() - this.renderPitch) * 0.5D);
                 this.renderYaw = (float) ((double) this.renderYaw + (double) (this.getYaw() - this.renderYaw) * 0.5D);

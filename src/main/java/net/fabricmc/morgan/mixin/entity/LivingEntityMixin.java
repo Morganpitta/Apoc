@@ -164,11 +164,11 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityEx
             return false;
         }
         else {
-            ExampleMod.LOGGER.info("doing fall damamge stufs");
+            //ExampleMod.LOGGER.info("doing fall damamge stufs");
             int i = this.computeFallDamage(fallDistance, damageMultiplier);
-            ExampleMod.LOGGER.info(i);
+            //ExampleMod.LOGGER.info(i);
             if (i > 0) {
-                ExampleMod.LOGGER.info("yes");
+                //ExampleMod.LOGGER.info("yes");
                 this.playSound(this.getFallSound(i), 1.0F, 1.0F);
                 this.playBlockFallSound();
                 ExampleMod.LOGGER.info(this.damage(damageSource, (float) i));

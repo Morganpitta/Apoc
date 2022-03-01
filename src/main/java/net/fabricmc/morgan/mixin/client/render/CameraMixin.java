@@ -48,7 +48,7 @@ public abstract class CameraMixin {
         this.area = area;
         this.focusedEntity = focusedEntity;
         this.thirdPerson = thirdPerson;
-        this.setRotation(focusedEntity.getYaw(tickDelta), 180+focusedEntity.getPitch(tickDelta));
+        this.setRotation(focusedEntity.getYaw(tickDelta), focusedEntity.getPitch(tickDelta)+(((EntityExtension)focusedEntity).upsideDownGravity()?180:0));
         //if (focusedEntity instanceof PlayerEntity) {((PlayerEntity) focusedEntity).sendMessage(Text.of(String.valueOf((double)MathHelper.lerp(tickDelta, this.lastCameraY, this.cameraY))),false);};
         this.setPos(MathHelper.lerp((double)tickDelta, focusedEntity.prevX, focusedEntity.getX()), MathHelper.lerp((double)tickDelta, focusedEntity.prevY, focusedEntity.getY()) + ( ((EntityExtension)focusedEntity).upsideDownGravity()? 2 - (double)MathHelper.lerp(tickDelta, this.lastCameraY, this.cameraY): (double)MathHelper.lerp(tickDelta, this.lastCameraY, this.cameraY)), MathHelper.lerp((double)tickDelta, focusedEntity.prevZ, focusedEntity.getZ()));
         if (thirdPerson) {

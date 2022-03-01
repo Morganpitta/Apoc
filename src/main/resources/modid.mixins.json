@@ -10,6 +10,8 @@
     "block.FluidBlockMixin",
     "block.GrassBlockMixin",
     "block.SlimeBlockMixin",
+    "client.MouseMixin",
+    "client.item.ModelPredicateProviderRegistryMixin",
     "client.network.ClientPlayerEntityMixin",
     "client.render.CameraMixin",
     "client.render.entity.LivingEntityRendererMixin",

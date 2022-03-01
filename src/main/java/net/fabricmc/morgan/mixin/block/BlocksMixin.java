@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.Slice;
 public abstract class BlocksMixin{
 
     @Shadow
-    protected static Block register(String id, Block block) {
+    private static Block register(String id, Block block) {
         return null;
     }
 

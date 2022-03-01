@@ -178,6 +178,16 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
 
     @Shadow public double prevX;
 
+    @Shadow public abstract Vec3d getRotationVector();
+
+    @Shadow public abstract float getPitch(float tickDelta);
+
+    @Shadow public abstract float getYaw();
+
+    @Shadow protected abstract Vec3d getRotationVector(float pitch, float yaw);
+
+    @Shadow public abstract float getYaw(float tickDelta);
+
     public EntityMixin(EntityType<?> type, World world) {
 
     }
@@ -246,6 +256,15 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
         //if ((Entity)(Object)this instanceof PlayerEntity) {((PlayerEntity) (Object)this).sendMessage(Text.of(String.valueOf(this.getStandingEyeHeight())),false);};
         double f = MathHelper.lerp((double)tickDelta, this.prevZ, this.getZ());
         return new Vec3d(d, e, f);
+    }
+
+    /**
+     * @author Morgan
+     * @reason gravity stuff
+     */
+    @Overwrite
+    public final Vec3d getRotationVec(float tickDelta) {
+        return this.getRotationVector(this.getPitch(tickDelta)+(((EntityExtension)this).upsideDownGravity()?180:0), this.getYaw(tickDelta));
     }
 
 
@@ -412,8 +431,8 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
         heightDifference *=gravity/0.08;
         if (onGround) {
             if (this.fallDistance > 0.0F) {
-                ExampleMod.LOGGER.info(landedState.getBlock());
-                ExampleMod.LOGGER.info(fallDistance);
+                //ExampleMod.LOGGER.info(landedState.getBlock());
+                //ExampleMod.LOGGER.info(fallDistance);
                 landedState.getBlock().onLandedUpon(this.world, landedState, landedPosition, (Entity) (Object) this, this.fallDistance);
                 if (!landedState.isIn(BlockTags.OCCLUDES_VIBRATION_SIGNALS)) {
                     this.emitGameEvent(GameEvent.HIT_GROUND);
