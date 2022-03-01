@@ -335,7 +335,7 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityEx
             if (((PlayerEntityExtension) this).getJump()||((EntityExtension)this).getGravity()<0) {
                 this.setVelocity(vec3d.x, d, vec3d.z);
                 if (this.isSprinting()) {
-                    float f = this.getYaw() * 0.017453292F;
+                    float f = (180+this.getYaw()) * 0.017453292F;
                     this.setVelocity(this.getVelocity().add((double) (-MathHelper.sin(f) * 0.2F), 0.0D, (double) (MathHelper.cos(f) * 0.2F)));
                 }
             }
