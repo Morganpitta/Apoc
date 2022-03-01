@@ -10,6 +10,8 @@ import net.fabricmc.morgan.entity.player.PlayerEntityExtension;
 import net.minecraft.block.Blocks;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.*;
+import net.minecraft.entity.attribute.EntityAttribute;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -153,6 +155,8 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityEx
 
     @Shadow protected abstract void applyDamage(DamageSource source, float amount);
 
+    @Shadow public abstract double getAttributeValue(EntityAttribute attribute);
+
     /**
      * @author Morgan
      * @reason yet again trying to make fall damage not
@@ -194,7 +198,7 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityEx
             if (g < 0.0 && !this.getBlockStateAtPos().isOf(Blocks.SCAFFOLDING) && this.isHoldingOntoLadder() && (LivingEntity)(Object)this instanceof PlayerEntity) {
                 g = 0.0;
             }
-            if (((EntityExtension)this).getGravity()<0){
+            if (((EntityExtension)this).upsideDownGravity()){
                 motion = new Vec3d(d, -g, e);
             }
             else {
@@ -204,6 +208,20 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityEx
         return motion;
     }
 
+    /**
+     * @author Morgan
+     * @reason Upside down agggh
+     */
+    @Overwrite
+    public void takeKnockback(double strength, double x, double z) {
+        if ((strength *= 1.0 - this.getAttributeValue(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE)) <= 0.0) {
+            return;
+        }
+        this.velocityDirty = true;
+        Vec3d vec3d = this.getVelocity();
+        Vec3d vec3d2 = new Vec3d(x, 0.0, z).normalize().multiply(strength);
+        this.setVelocity(vec3d.x / 2.0 - vec3d2.x, (this.onGround ? Math.min(0.4, vec3d.y / 2.0 + strength) : vec3d.y)*(((EntityExtension)this).upsideDownGravity()?-1:1), vec3d.z / 2.0 - vec3d2.z);
+    }
 
     /**
      * @author Morgan
@@ -603,7 +621,13 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityEx
         int bl;
         if (!this.world.isClient && !this.isDead()) {
             bl = this.getFrozenTicks();
-            if (this.inPowderSnow && this.canFreeze()) {
+            if (this.getY()>350){
+                this.setFrozenTicks(Math.min(200, bl + 5));
+            }
+            else if (this.getY()>300){
+                this.setFrozenTicks(Math.min(this.getMinFreezeDamageTicks(), bl + 2));
+            }
+            else if (this.inPowderSnow && this.canFreeze()) {
                 this.setFrozenTicks(Math.min(this.getMinFreezeDamageTicks(), bl + 1));
             } else {
                 this.setFrozenTicks(Math.max(0, bl - 2));
@@ -612,7 +636,12 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityEx
 
         this.removePowderSnowSlow();
         this.addPowderSnowSlowIfNeeded();
-        if (!this.world.isClient && this.age % 40 == 0 && this.isFreezing() && this.canFreeze()) {
+
+        if (!this.world.isClient && this.age % 2 == 0 && this.isFreezing() && !this.isSpectator()&&this.getFrozenTicks()>this.getMinFreezeDamageTicks()) {
+            bl = bl2 ? 5 : 1;
+            this.damage(DamageSource.FREEZE, bl*2);
+        }
+        else if (!this.world.isClient && this.age % 40 == 0 && this.isFreezing() && this.canFreeze()) {
             bl = bl2 ? 5 : 1;
             this.damage(DamageSource.FREEZE, (float)bl);
         }
