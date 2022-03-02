@@ -252,10 +252,33 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
     @Overwrite
     public final Vec3d getCameraPosVec(float tickDelta) {
         double d = MathHelper.lerp((double)tickDelta, this.prevX, this.getX());
-        double e = MathHelper.lerp((double)tickDelta, this.prevY, this.getY()) + (this.upsideDownGravity() ? 2 - (double)this.getStandingEyeHeight():(double)this.getStandingEyeHeight());
+        double e = MathHelper.lerp((double)tickDelta, this.prevY, this.getY()) + ((double) this.getStandingEyeHeight());
         //if ((Entity)(Object)this instanceof PlayerEntity) {((PlayerEntity) (Object)this).sendMessage(Text.of(String.valueOf(this.getStandingEyeHeight())),false);};
         double f = MathHelper.lerp((double)tickDelta, this.prevZ, this.getZ());
         return new Vec3d(d, e, f);
+    }
+
+    /**
+     * @author Morgan
+     * @reason gravity stuff
+     */
+    @Overwrite
+    public float getEyeHeight(EntityPose pose, EntityDimensions dimensions) {
+        ExampleMod.LOGGER.info(upsideDownGravity());
+        if (upsideDownGravity()){
+            ExampleMod.LOGGER.info("are you there?");
+            float orange = dimensions.height * 0.85f;
+            //height+=0.1;
+            float brown = (dimensions.height/2);
+            float grey = (orange-brown);
+            float height = orange-2*grey;
+            //(dimensions.height/2)
+            ExampleMod.LOGGER.info(String.valueOf(orange)+" "+String.valueOf(brown)+" "+String.valueOf(grey)+" "+String.valueOf(height));
+            return height;
+        } else {
+            //ExampleMod.LOGGER.info("help me!");
+            return dimensions.height * 0.85f;
+        }
     }
 
     /**
