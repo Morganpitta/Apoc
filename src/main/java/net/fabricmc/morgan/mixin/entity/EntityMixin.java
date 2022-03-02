@@ -209,11 +209,11 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
     public BlockPos getLandingPos() {
         BlockPos blockPos2;
         BlockState blockState;
-        int k;
-        int j= MathHelper.floor(this.pos.y + (double)(this.upsideDownGravity()?2.2f:-.2f));
-        //ExampleMod.LOGGER.info(j);
+        int k= MathHelper.floor(this.pos.z);
+        int j= MathHelper.floor((double)(this.upsideDownGravity()?this.getBoundingBox().maxY+.2f:this.pos.y -.2f));
+        //ExampleMod.LOGGER.info(String.valueOf(j)+"  "+String.valueOf(this.pos.y));
         int i = MathHelper.floor(this.pos.x);
-        BlockPos blockPos = new BlockPos(i, j , k = MathHelper.floor(this.pos.z));
+        BlockPos blockPos = new BlockPos(i, j , k );
         if (this.world.getBlockState(blockPos).isAir() && ((blockState = this.world.getBlockState(blockPos2 = blockPos.down())).isIn(BlockTags.FENCES) || blockState.isIn(BlockTags.WALLS) || blockState.getBlock() instanceof FenceGateBlock)) {
             return blockPos2;
         }
@@ -361,20 +361,18 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
 
                 Block block = blockState.getBlock();
                 if (movement.y != vec3d.y) {
-                    block.onEntityLand(this.world, (Entity) (Object) this);
+                    if (getBouncy()) {
+                        //this.handleFallDamage(fallDistance, 0.0F, DamageSource.FALL);
+                        this.setVelocity(vec3d.x, -vec3d2.y * Bounciness.Bounciness, vec3d.z);
+                    }
+                    else {
+                        block.onEntityLand(this.world, (Entity) (Object) this);
+                    }
                 }
 
                 if (this.onGround) {
                     ((BlockExtension)block).onSteppedOnIgnoringCrouching(this.world, blockPos, blockState, (Entity) (Object) this);
                     if(!this.bypassesSteppingEffects()) {
-                        if (getBouncy() && vec3d.y < 0.0D) {
-                            this.handleFallDamage(fallDistance, 0.0F, DamageSource.FALL);
-                            if (this.isPlayer()) {
-                                this.setVelocity(vec3d.x, -vec3d2.y * Bounciness.Bounciness, vec3d.z);
-                            } else {
-                                this.setVelocity(vec3d.x, -vec3d2.y * Bounciness.Bounciness, vec3d.z);
-                            }
-                        }
                         block.onSteppedOn(this.world, blockPos, blockState, (Entity) (Object) this);
                     }
                 }
@@ -452,6 +450,7 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
     @Overwrite
     public void fall(double heightDifference, boolean onGround, BlockState landedState, BlockPos landedPosition) {
         heightDifference *=gravity/0.08;
+        //ExampleMod.LOGGER.info(heightDifference);
         if (onGround) {
             if (this.fallDistance > 0.0F) {
                 //ExampleMod.LOGGER.info(landedState.getBlock());
@@ -466,8 +465,8 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
         } else if (heightDifference < 0.0D&&!this.upsideDownGravity()) {
             this.fallDistance = (float)((double)this.fallDistance - heightDifference);
         }
-        else if (this.upsideDownGravity()&&heightDifference<0.0D){
-            this.fallDistance = (float)((double)this.fallDistance - heightDifference);
+        else if (this.upsideDownGravity()&&heightDifference>0.0D){
+            this.fallDistance = (float)((double)this.fallDistance + heightDifference);
         }
     }
 

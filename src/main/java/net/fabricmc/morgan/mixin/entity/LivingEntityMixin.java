@@ -637,9 +637,9 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityEx
         this.removePowderSnowSlow();
         this.addPowderSnowSlowIfNeeded();
 
-        if (!this.world.isClient && this.age % 2 == 0 && this.isFreezing() && !this.isSpectator()&&this.getFrozenTicks()>this.getMinFreezeDamageTicks()) {
+        if (!this.world.isClient &&  this.isFreezing() && !this.isSpectator()&&this.getFrozenTicks()>this.getMinFreezeDamageTicks()) {
             bl = bl2 ? 5 : 1;
-            this.damage(DamageSource.FREEZE, bl*2);
+            this.damage(DamageSource.FREEZE, bl*4);
         }
         else if (!this.world.isClient && this.age % 40 == 0 && this.isFreezing() && this.canFreeze()) {
             bl = bl2 ? 5 : 1;
