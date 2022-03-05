@@ -58,6 +58,7 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityEx
             buf.writeBoolean(upsideDown);
             ServerPlayNetworking.send((ServerPlayerEntity) (Object) this, ExampleMod.UPSIDE_DOWN_PACKET_ID, buf);
         }
+        this.calculateDimensions();
     }
 
     public boolean renderUpsideDown = false;

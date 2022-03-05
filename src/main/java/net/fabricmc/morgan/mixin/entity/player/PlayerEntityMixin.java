@@ -5,6 +5,7 @@
 
 package net.fabricmc.morgan.mixin.entity.player;
 
+import com.mojang.authlib.GameProfile;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.morgan.ExampleMod;
@@ -64,6 +65,11 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
         super(entityType, world);
     }
 
+    @Inject(method = "<init>", at = @At("TAIL"))
+    public void onInitialise(World world, BlockPos pos, float yaw, GameProfile profile, CallbackInfo ci){
+        checkPlayerDisabilities();
+    }
+
     public int tick = 0;
     public int onFireForTicks=0;
     public int fuse=-100;
@@ -74,7 +80,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
     public boolean getForgetful() {return this.isForgetful;}
     public void setForgetful(boolean bool) {
         this.isForgetful=bool;
-        if (!this.world.isClient()) {
+        if (!this.world.isClient()&& ((ServerPlayerEntity) (Object) this).networkHandler != null) {
             PacketByteBuf buf = PacketByteBufs.create();
             buf.writeBoolean(bool);
             ServerPlayNetworking.send((ServerPlayerEntity) (Object) this, ExampleMod.FORGETFUL_PACKET_ID, buf);
@@ -85,7 +91,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
     public Vec3d getDeathPos(){return this.deathPos;}
     public void setDeathPos(Vec3d pos) {
         this.deathPos=pos;
-        if (!this.world.isClient()) {
+        if (!this.world.isClient() &&((ServerPlayerEntity) (Object) this).networkHandler != null) {
             PacketByteBuf buf = PacketByteBufs.create();
             buf.writeBlockPos(new BlockPos((double) pos.x,(double)pos.y,(double)pos.z));
             ServerPlayNetworking.send((ServerPlayerEntity) (Object) this, ExampleMod.DEATH_PACKET_ID, buf);
@@ -96,7 +102,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
     public int getSleepSheep(){return this.SleepSheep;}
     public void setSleepSheep(int sheep) {
         this.SleepSheep=sheep;
-        if (!this.world.isClient()) {
+        if (!this.world.isClient()&& ((ServerPlayerEntity) (Object) this).networkHandler != null) {
             PacketByteBuf buf = PacketByteBufs.create();
             buf.writeInt(sheep);
             ServerPlayNetworking.send((ServerPlayerEntity) (Object) this, ExampleMod.BLIND_PACKET_ID, buf);
@@ -107,7 +113,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
     public boolean getJump() {return this.CanJump;}
     public void setJump(boolean bool) {
         this.CanJump=bool;
-        if (!this.world.isClient()) {
+        if (!this.world.isClient()&&((ServerPlayerEntity) (Object) this).networkHandler != null) {
             PacketByteBuf buf = PacketByteBufs.create();
             buf.writeBoolean(bool);
             ServerPlayNetworking.send((ServerPlayerEntity) (Object) this, ExampleMod.CAN_JUMP_PACKET_ID, buf);
@@ -118,7 +124,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
     public boolean getBlind() {return this.isBlind;}
     public void setBlind(boolean bool) {
         this.isBlind=bool;
-        if (!this.world.isClient()) {
+        if (!this.world.isClient()&&((ServerPlayerEntity) (Object) this).networkHandler != null) {
             PacketByteBuf buf = PacketByteBufs.create();
             buf.writeBoolean(bool);
             ServerPlayNetworking.send((ServerPlayerEntity) (Object) this, ExampleMod.WEIGHT_PACKET_ID, buf);
@@ -131,7 +137,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
     public boolean getAffectedByWeight(){return this.isAffectedByWeight;}
     public void setAffectedByWeight(boolean bool) {
         this.isAffectedByWeight=bool;
-        if (!this.world.isClient()) {
+        if (!this.world.isClient() && ((ServerPlayerEntity) (Object) this).networkHandler != null) {
             PacketByteBuf buf = PacketByteBufs.create();
             buf.writeBoolean(bool);
             ServerPlayNetworking.send((ServerPlayerEntity) (Object) this, ExampleMod.DEATH_PACKET_ID, buf);
@@ -244,7 +250,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
         if (this.isSad){
             giveUpAndDie();
         }
-        this.checkPlayerDisabilities();
+        //this.checkPlayerDisabilities();
         if (this.isSleeping()&&!this.world.isClient)
         {
             SleepSheep=SleepSheep+1;

@@ -6,9 +6,7 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.morgan.ExampleMod;
 import net.fabricmc.morgan.block.BlockExtension;
-import net.fabricmc.morgan.block.MeatBlock;
 import net.fabricmc.morgan.entity.EntityExtension;
-import net.fabricmc.morgan.mixin.block.BlockMixin;
 import net.fabricmc.morgan.world.entity.Bounciness;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -25,7 +23,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.tag.BlockTags;
 import net.minecraft.tag.FluidTags;
 import net.minecraft.tag.Tag;
-import net.minecraft.text.Text;
 import net.minecraft.util.Nameable;
 import net.minecraft.util.math.*;
 import net.minecraft.world.World;
@@ -45,9 +42,18 @@ import java.util.List;
 @Mixin(Entity.class)
 public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutput, EntityExtension {
 
+    @Inject(method="<init>",at = @At("TAIL"))
+    public void Entity(EntityType<?> type, World world, CallbackInfo info){
+        //this.gravity = 0.08D;
+        this.gravity = -0.08D;
+        this.standingEyeHeight = this.getEyeHeight(EntityPose.STANDING, this.dimensions);
+        ExampleMod.LOGGER.info(standingEyeHeight);
+    }
+
+
     public boolean upsideDownGravity(){return this.getGravity()<0;}
 
-    public double gravity = 0.08D;
+    public double gravity;
     public double getGravity(){return this.gravity;}
     public void setGravity(double gravity) {
         this.gravity = gravity;
@@ -56,6 +62,7 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
             buf.writeDouble(gravity);
             ServerPlayNetworking.send((ServerPlayerEntity) (Object) this, ExampleMod.GRAVITY_PACKET_ID, buf);
         }
+        this.calculateDimensions();
     }
 
     public boolean isBouncy=false;
@@ -188,6 +195,12 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
 
     @Shadow public abstract float getYaw(float tickDelta);
 
+    @Shadow public abstract void calculateDimensions();
+
+    @Shadow private float standingEyeHeight;
+
+    @Shadow private EntityDimensions dimensions;
+
     public EntityMixin(EntityType<?> type, World world) {
 
     }
@@ -264,19 +277,21 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
      */
     @Overwrite
     public float getEyeHeight(EntityPose pose, EntityDimensions dimensions) {
-        ExampleMod.LOGGER.info(upsideDownGravity());
+        //ExampleMod.LOGGER.info(String.valueOf(upsideDownGravity())+" "+String.valueOf(getGravity()));
         if (upsideDownGravity()){
-            ExampleMod.LOGGER.info("are you there?");
+
             float orange = dimensions.height * 0.85f;
             //height+=0.1;
             float brown = (dimensions.height/2);
             float grey = (orange-brown);
             float height = orange-2*grey;
             //(dimensions.height/2)
-            ExampleMod.LOGGER.info(String.valueOf(orange)+" "+String.valueOf(brown)+" "+String.valueOf(grey)+" "+String.valueOf(height));
+            //ExampleMod.LOGGER.info(String.valueOf(orange)+" "+String.valueOf(brown)+" "+String.valueOf(grey)+" "+String.valueOf(height));
+            ExampleMod.LOGGER.info("are you there?"+" "+String.valueOf(height));
             return height;
         } else {
-            //ExampleMod.LOGGER.info("help me!");
+            ExampleMod.LOGGER.info("help me!"+" "+String.valueOf(dimensions.height * 0.85f));
+
             return dimensions.height * 0.85f;
         }
     }
@@ -332,6 +347,7 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
             }
 
             this.onGround = this.getGravity()>=0 ?this.verticalCollision && movement.y < 0.0D:this.verticalCollision && movement.y > 0.0D;
+            if ((Entity)(Object)this instanceof PlayerEntity){ExampleMod.LOGGER.info(String.valueOf(this)+ " "+ String.valueOf(this.standingEyeHeight));}
             BlockPos blockPos = this.getLandingPos();
             BlockState blockState = this.world.getBlockState(blockPos);
             this.fall(vec3d.y, this.onGround, blockState, blockPos);
@@ -449,7 +465,7 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
      */
     @Overwrite
     public void fall(double heightDifference, boolean onGround, BlockState landedState, BlockPos landedPosition) {
-        heightDifference *=gravity/0.08;
+        heightDifference *=MathHelper.sqrt((float) MathHelper.square(gravity/0.08));
         //ExampleMod.LOGGER.info(heightDifference);
         if (onGround) {
             if (this.fallDistance > 0.0F) {
