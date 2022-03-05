@@ -219,9 +219,9 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
 
     @Inject(method = "tick",at = @At("HEAD"))
     public void tick(CallbackInfo info) {
-        if (!((LivingEntityExtension)this).getUpsideDown()){
-            ((LivingEntityExtension)this).setUpsideDown(true);
-        }
+        //if (!((LivingEntityExtension)this).getUpsideDown()){
+        //    ((LivingEntityExtension)this).setUpsideDown(true);
+        //}
         if (this.getForgetful()&&--this.nextDropItem<0) {
             ((PlayerInventoryExtension)this.getInventory()).dropRandomUsedSlot();
             this.nextDropItem = this.random.nextInt(6000) + 6000;
