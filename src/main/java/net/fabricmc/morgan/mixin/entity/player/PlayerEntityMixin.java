@@ -67,6 +67,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
 
     @Inject(method = "<init>", at = @At("TAIL"))
     public void onInitialise(World world, BlockPos pos, float yaw, GameProfile profile, CallbackInfo ci){
+        ((LivingEntityExtension)this).setUpsideDown(true);
         checkPlayerDisabilities();
     }
 
@@ -210,6 +211,8 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
 
     @Shadow protected abstract boolean method_30263();
 
+    @Shadow public abstract EntityDimensions getDimensions(EntityPose pose);
+
     @Inject(method = "writeCustomDataToNbt",at = @At("HEAD"))
     public void writeCustomDataToNbt(NbtCompound nbt,CallbackInfo info) {
         nbt.putInt("SleepSheep", this.SleepSheep);
@@ -326,6 +329,8 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
         if ((Objects.equals(this.getEntityName(), "MagmaStan"))&&!((LivingEntityExtension)this).getUpsideDown()) {
             ((LivingEntityExtension)this).setUpsideDown(true);
         }
+
+        ((EntityExtension)this).setStandingEyeHeight(this.getEyeHeight(EntityPose.STANDING, this.getDimensions(EntityPose.STANDING)));
     }
 
     @Inject(method = "tickMovement",at = @At("HEAD"))

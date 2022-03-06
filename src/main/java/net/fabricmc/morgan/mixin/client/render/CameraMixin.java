@@ -1,5 +1,8 @@
 package net.fabricmc.morgan.mixin.client.render;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.morgan.ExampleMod;
 import net.fabricmc.morgan.entity.EntityExtension;
 import net.minecraft.client.render.Camera;
 import net.minecraft.entity.Entity;
@@ -13,6 +16,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
+@Environment(value= EnvType.CLIENT)
 @Mixin(Camera.class)
 public abstract class CameraMixin {
     @Shadow private boolean ready;
@@ -41,6 +45,7 @@ public abstract class CameraMixin {
 
     /**
      * @author Morgan
+     * @reason checking some stuff
      */
     @Overwrite
     public void update(BlockView area, Entity focusedEntity, boolean thirdPerson, boolean inverseView, float tickDelta) {
@@ -48,9 +53,9 @@ public abstract class CameraMixin {
         this.area = area;
         this.focusedEntity = focusedEntity;
         this.thirdPerson = thirdPerson;
-        this.setRotation(focusedEntity.getYaw(tickDelta), focusedEntity.getPitch(tickDelta)+(((EntityExtension)focusedEntity).upsideDownGravity()?180:0));
+        this.setRotation(focusedEntity.getYaw(tickDelta), (focusedEntity).getPitch(tickDelta));
         this.setPos(MathHelper.lerp((double)tickDelta, focusedEntity.prevX, focusedEntity.getX()), MathHelper.lerp((double)tickDelta, focusedEntity.prevY, focusedEntity.getY()) + (double)MathHelper.lerp(tickDelta, this.lastCameraY, this.cameraY), MathHelper.lerp((double)tickDelta, focusedEntity.prevZ, focusedEntity.getZ()));
-        if (focusedEntity instanceof PlayerEntity) {((PlayerEntity) focusedEntity).sendMessage(Text.of(String.valueOf(/**(double)MathHelper.lerp(tickDelta, this.lastCameraY, this.cameraY)**/ this.focusedEntity)+" "+String.valueOf(this.focusedEntity.getStandingEyeHeight())),false);};
+        //if (focusedEntity instanceof PlayerEntity) {ExampleMod.LOGGER.info((focusedEntity).getPitch(tickDelta));}
         if (thirdPerson) {
             if (inverseView) {
                 this.setRotation(this.yaw + 180.0f, -this.pitch);

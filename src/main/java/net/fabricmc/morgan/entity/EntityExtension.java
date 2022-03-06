@@ -7,5 +7,6 @@ public interface EntityExtension {
     double getGravity();
     void setGravity(double gravity);
     boolean upsideDownGravity();
+    void setStandingEyeHeight(float eyeHeight);
 }
 

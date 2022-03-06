@@ -14,7 +14,6 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.FenceGateBlock;
 import net.minecraft.entity.*;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
@@ -25,6 +24,7 @@ import net.minecraft.tag.FluidTags;
 import net.minecraft.tag.Tag;
 import net.minecraft.util.Nameable;
 import net.minecraft.util.math.*;
+import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.World;
 import net.minecraft.world.entity.EntityLike;
 import net.minecraft.world.event.GameEvent;
@@ -45,7 +45,6 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
     @Inject(method="<init>",at = @At("TAIL"))
     public void Entity(EntityType<?> type, World world, CallbackInfo info){
         //this.gravity = 0.08D;
-        this.gravity = -0.08D;
         this.standingEyeHeight = this.getEyeHeight(EntityPose.STANDING, this.dimensions);
         ExampleMod.LOGGER.info(standingEyeHeight);
     }
@@ -53,7 +52,7 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
 
     public boolean upsideDownGravity(){return this.getGravity()<0;}
 
-    public double gravity;
+    public double gravity=0.08;
     public double getGravity(){return this.gravity;}
     public void setGravity(double gravity) {
         this.gravity = gravity;
@@ -119,7 +118,6 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
 
     @Shadow  protected abstract Vec3d adjustMovementForPiston(Vec3d movement) ;
     @Shadow protected abstract Vec3d adjustMovementForSneaking(Vec3d movement, MovementType type);
-    @Shadow abstract public Vec3d adjustMovementForCollisions(Vec3d movement);
     @Shadow public abstract Vec3d getVelocity();
 
     @Shadow abstract public boolean bypassesSteppingEffects();
@@ -187,8 +185,6 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
 
     @Shadow public abstract Vec3d getRotationVector();
 
-    @Shadow public abstract float getPitch(float tickDelta);
-
     @Shadow public abstract float getYaw();
 
     @Shadow protected abstract Vec3d getRotationVector(float pitch, float yaw);
@@ -200,6 +196,18 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
     @Shadow private float standingEyeHeight;
 
     @Shadow private EntityDimensions dimensions;
+
+    @Shadow private float pitch;
+
+    @Shadow public abstract float getPitch();
+
+    @Shadow public float prevPitch;
+
+    @Shadow protected abstract float getEyeHeight(EntityPose pose, EntityDimensions dimensions);
+
+    @Shadow public float stepHeight;
+
+    @Shadow protected abstract Vec3d adjustMovementForCollisions(Vec3d movement);
 
     public EntityMixin(EntityType<?> type, World world) {
 
@@ -272,12 +280,9 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
     }
 
     /**
-     * @author Morgan
-     * @reason gravity stuff
-     */
     @Overwrite
     public float getEyeHeight(EntityPose pose, EntityDimensions dimensions) {
-        //ExampleMod.LOGGER.info(String.valueOf(upsideDownGravity())+" "+String.valueOf(getGravity()));
+        ExampleMod.LOGGER.info(String.valueOf(upsideDownGravity())+" "+String.valueOf(getGravity()));
         if (upsideDownGravity()){
 
             float orange = dimensions.height * 0.85f;
@@ -295,14 +300,72 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
             return dimensions.height * 0.85f;
         }
     }
+    **/
+
+
+    public void setStandingEyeHeight(float eyeHeight){
+        this.standingEyeHeight = eyeHeight;
+        ExampleMod.LOGGER.info("checking player disabilities stuff"+String.valueOf(standingEyeHeight));
+    }
 
     /**
      * @author Morgan
      * @reason gravity stuff
      */
+     @Inject(method = "adjustMovementForCollisions(Lnet/minecraft/util/math/Vec3d;)Lnet/minecraft/util/math/Vec3d;",at = @At("HEAD"),cancellable = true)
+    private void adjustMovementForCollisionsUpsideDown(Vec3d movement, CallbackInfoReturnable<Vec3d> cir) {
+         if (this.upsideDownGravity()) {
+             boolean bl4;
+             Box box = this.getBoundingBox();
+             List<VoxelShape> list = this.world.getEntityCollisions((Entity) (Object) this, box.stretch(movement));
+             Vec3d vec3d = movement.lengthSquared() == 0.0 ? movement : Entity.adjustMovementForCollisions((Entity) (Object) this, movement, box, this.world, list);
+             boolean bl = movement.x != vec3d.x;
+             boolean bl2 = movement.y != vec3d.y;
+             boolean bl3 = movement.z != vec3d.z;
+             boolean bl5 = bl4 = this.onGround || bl2 && movement.y > 0.0;
+             if (this.stepHeight > 0.0f && bl4 && (bl || bl3)) {
+                 Vec3d vec3d4;
+                 Vec3d vec3d2 = Entity.adjustMovementForCollisions((Entity) (Object) this, new Vec3d(movement.x, -this.stepHeight, movement.z), box, this.world, list);
+                 Vec3d vec3d3 = Entity.adjustMovementForCollisions((Entity) (Object) this, new Vec3d(0.0, -this.stepHeight, 0.0), box.stretch(movement.x, 0.0, movement.z), this.world, list);
+                 if (vec3d3.y > (double) this.stepHeight && (vec3d4 = Entity.adjustMovementForCollisions((Entity) (Object) this, new Vec3d(movement.x, 0.0, movement.z), box.offset(vec3d3), this.world, list).add(vec3d3)).horizontalLengthSquared() > vec3d2.horizontalLengthSquared()) {
+                     vec3d2 = vec3d4;
+                 }
+                 if (vec3d2.horizontalLengthSquared() > vec3d.horizontalLengthSquared()) {
+                     cir.setReturnValue( vec3d2.add(Entity.adjustMovementForCollisions((Entity) (Object) this, new Vec3d(0.0, -vec3d2.y + movement.y, 0.0), box.offset(vec3d2), this.world, list)));
+                 }
+             }
+             cir.setReturnValue( vec3d);
+         }
+    }
+
+
+    /**
+     * @author Morgan
+     * @reason gravity stuff
+     */
+    /**
     @Overwrite
     public final Vec3d getRotationVec(float tickDelta) {
         return this.getRotationVector(this.getPitch(tickDelta)+(((EntityExtension)this).upsideDownGravity()?180:0), this.getYaw(tickDelta));
+    }
+    **/
+
+    /**
+     * @author Morgan
+     * @reason gravity stuff
+     */
+    @Inject(method = "getPitch(F)F",at = @At("HEAD"),cancellable = true)
+    public void getPitch(float tickDelta, CallbackInfoReturnable<Float> cir) {
+        if (this.upsideDownGravity()) {
+            //ExampleMod.LOGGER.info("getting pitch"+String.valueOf(upsideDownGravity()));
+            //ExampleMod.LOGGER.info(String.valueOf(getPitch()) + " " + String.valueOf(getPitch() + ((this).upsideDownGravity() ? 180 : 0)));
+            if (tickDelta == 1.0f) {
+                //ExampleMod.LOGGER.info(this.getPitch()+((this).upsideDownGravity()?180:0));
+                cir.setReturnValue(this.getPitch() + 180);
+            }
+            //ExampleMod.LOGGER.info(MathHelper.lerp(tickDelta, this.prevPitch, this.getPitch())+((this).upsideDownGravity()?180:0));
+            cir.setReturnValue(MathHelper.lerp(tickDelta, this.prevPitch, this.getPitch()) + 180);
+        }
     }
 
 
@@ -347,7 +410,7 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
             }
 
             this.onGround = this.getGravity()>=0 ?this.verticalCollision && movement.y < 0.0D:this.verticalCollision && movement.y > 0.0D;
-            if ((Entity)(Object)this instanceof PlayerEntity){ExampleMod.LOGGER.info(String.valueOf(this)+ " "+ String.valueOf(this.standingEyeHeight));}
+            //if ((Entity)(Object)this instanceof PlayerEntity){ExampleMod.LOGGER.info(String.valueOf(this)+ " "+ String.valueOf(this.standingEyeHeight));}
             BlockPos blockPos = this.getLandingPos();
             BlockState blockState = this.world.getBlockState(blockPos);
             this.fall(vec3d.y, this.onGround, blockState, blockPos);

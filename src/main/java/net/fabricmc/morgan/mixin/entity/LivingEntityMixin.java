@@ -36,6 +36,9 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Optional;
 
@@ -157,6 +160,23 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityEx
     @Shadow protected abstract void applyDamage(DamageSource source, float amount);
 
     @Shadow public abstract double getAttributeValue(EntityAttribute attribute);
+
+    @Shadow protected abstract float getActiveEyeHeight(EntityPose pose, EntityDimensions dimensions);
+
+    @Inject(method = "getEyeHeight",at= @At("HEAD"),cancellable = true)
+    protected final void getEyeHeight(EntityPose pose, EntityDimensions dimensions, CallbackInfoReturnable<Float> cir) {
+        if (((EntityExtension)this).upsideDownGravity()){
+            float orange = this.getActiveEyeHeight(pose, dimensions);
+            //height+=0.1;
+            float brown = (dimensions.height/2);
+            float grey = (orange-brown);
+            float height = orange-2*grey;
+            //(dimensions.height/2)
+            //ExampleMod.LOGGER.info(String.valueOf(orange)+" "+String.valueOf(brown)+" "+String.valueOf(grey)+" "+String.valueOf(height));
+            //ExampleMod.LOGGER.info("are you there?"+" "+String.valueOf(height));
+            cir.setReturnValue(pose == EntityPose.SLEEPING ? 0.2f :height);
+        }
+    }
 
     /**
      * @author Morgan

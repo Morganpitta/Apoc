@@ -1,5 +1,6 @@
 package net.fabricmc.morgan.mixin.client.network;
 
+import net.fabricmc.morgan.ExampleMod;
 import net.fabricmc.morgan.entity.EntityExtension;
 import net.fabricmc.morgan.entity.player.PlayerEntityExtension;
 import net.fabricmc.morgan.entity.player.PlayerInventoryExtension;
@@ -13,6 +14,7 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.*;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
@@ -292,5 +294,13 @@ public abstract class ClientPlayerEntityMixin extends PlayerEntityMixin {
         }
 
          **/
+    }
+
+
+    @Inject(method = "getPitch(F)F",at = @At("HEAD"),cancellable = true)
+    public void getPitch(float tickDelta, CallbackInfoReturnable<Float> cir) {
+        if (((EntityExtension)this).upsideDownGravity()) {
+            cir.setReturnValue(this.getPitch() + 180);
+        }
     }
 }
