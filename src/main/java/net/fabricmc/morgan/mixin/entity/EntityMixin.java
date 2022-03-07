@@ -308,11 +308,7 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
         ExampleMod.LOGGER.info("checking player disabilities stuff"+String.valueOf(standingEyeHeight));
     }
 
-    /**
-     * @author Morgan
-     * @reason gravity stuff
-     */
-     @Inject(method = "adjustMovementForCollisions(Lnet/minecraft/util/math/Vec3d;)Lnet/minecraft/util/math/Vec3d;",at = @At("HEAD"),cancellable = true)
+    @Inject(method = "adjustMovementForCollisions(Lnet/minecraft/util/math/Vec3d;)Lnet/minecraft/util/math/Vec3d;",at = @At("HEAD"),cancellable = true)
     private void adjustMovementForCollisionsUpsideDown(Vec3d movement, CallbackInfoReturnable<Vec3d> cir) {
          if (this.upsideDownGravity()) {
              boolean bl4;

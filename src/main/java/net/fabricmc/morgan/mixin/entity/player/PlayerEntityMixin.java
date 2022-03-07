@@ -366,7 +366,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerEn
         if (!this.abilities.flying && (type == MovementType.SELF || type == MovementType.PLAYER) && this.clipAtLedge() && this.method_30263()) {
             double d = movement.x;
             double e = movement.z;
-            double y = ((EntityExtension)this).upsideDownGravity() ?(double)(1+this.stepHeight):(double)(-this.stepHeight);
+            double y = ((EntityExtension)this).upsideDownGravity() ?(double)(this.getBoundingBox().maxY-this.getBoundingBox().minY+this.stepHeight):(double)(-this.stepHeight);
             double var7 = 0.05D;
 
             while(true) {
