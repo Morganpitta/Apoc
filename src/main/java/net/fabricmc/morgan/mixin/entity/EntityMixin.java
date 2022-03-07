@@ -46,7 +46,7 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
     public void Entity(EntityType<?> type, World world, CallbackInfo info){
         //this.gravity = 0.08D;
         this.standingEyeHeight = this.getEyeHeight(EntityPose.STANDING, this.dimensions);
-        ExampleMod.LOGGER.info(standingEyeHeight);
+        //ExampleMod.LOGGER.info(standingEyeHeight);
     }
 
 
@@ -305,7 +305,7 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
 
     public void setStandingEyeHeight(float eyeHeight){
         this.standingEyeHeight = eyeHeight;
-        ExampleMod.LOGGER.info("checking player disabilities stuff"+String.valueOf(standingEyeHeight));
+        //ExampleMod.LOGGER.info("checking player disabilities stuff"+String.valueOf(standingEyeHeight));
     }
 
     @Inject(method = "adjustMovementForCollisions(Lnet/minecraft/util/math/Vec3d;)Lnet/minecraft/util/math/Vec3d;",at = @At("HEAD"),cancellable = true)
@@ -323,7 +323,7 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
                  Vec3d vec3d4;
                  Vec3d vec3d2 = Entity.adjustMovementForCollisions((Entity) (Object) this, new Vec3d(movement.x, -this.stepHeight, movement.z), box, this.world, list);
                  Vec3d vec3d3 = Entity.adjustMovementForCollisions((Entity) (Object) this, new Vec3d(0.0, -this.stepHeight, 0.0), box.stretch(movement.x, 0.0, movement.z), this.world, list);
-                 if (vec3d3.y > (double) this.stepHeight && (vec3d4 = Entity.adjustMovementForCollisions((Entity) (Object) this, new Vec3d(movement.x, 0.0, movement.z), box.offset(vec3d3), this.world, list).add(vec3d3)).horizontalLengthSquared() > vec3d2.horizontalLengthSquared()) {
+                 if (vec3d3.y < (double) -this.stepHeight && (vec3d4 = Entity.adjustMovementForCollisions((Entity) (Object) this, new Vec3d(movement.x, 0.0, movement.z), box.offset(vec3d3), this.world, list).add(vec3d3)).horizontalLengthSquared() > vec3d2.horizontalLengthSquared()) {
                      vec3d2 = vec3d4;
                  }
                  if (vec3d2.horizontalLengthSquared() > vec3d.horizontalLengthSquared()) {
