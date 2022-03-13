@@ -207,8 +207,6 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
 
     @Shadow public float stepHeight;
 
-    @Shadow protected abstract Vec3d adjustMovementForCollisions(Vec3d movement);
-
     public EntityMixin(EntityType<?> type, World world) {
 
     }
@@ -218,7 +216,7 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
         nbt.putBoolean("IsBouncy", this.isBouncy);
     }
     @Inject(method = "readNbt",at = @At("HEAD"))
-    public void readNbt(NbtCompound nbt,CallbackInfo info ) {
+    public void readNbt(NbtCompound nbt, CallbackInfo info ) {
         this.setBouncy(nbt.getBoolean("IsBouncy"));
     }
 
@@ -308,8 +306,12 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
         //ExampleMod.LOGGER.info("checking player disabilities stuff"+String.valueOf(standingEyeHeight));
     }
 
-    @Inject(method = "adjustMovementForCollisions(Lnet/minecraft/util/math/Vec3d;)Lnet/minecraft/util/math/Vec3d;",at = @At("HEAD"),cancellable = true)
-    public void adjustMovementForCollisions(Vec3d movement, CallbackInfoReturnable<Vec3d> cir) {
+    /**
+     * @author Morgan
+     * @reason slabs and stairs upsidedown
+     */
+    @Overwrite
+    public Vec3d adjustMovementForCollisions(Vec3d movement) {
         //ExampleMod.LOGGER.info(this.upsideDownGravity());
         if (this.upsideDownGravity()) {
             boolean bl4;
@@ -328,12 +330,33 @@ public abstract class EntityMixin  implements Nameable, EntityLike, CommandOutpu
                     vec3d2 = vec3d4;
                 }
                 if (vec3d2.horizontalLengthSquared() > vec3d.horizontalLengthSquared()) {
-                    cir.setReturnValue( vec3d2.add(Entity.adjustMovementForCollisions((Entity) (Object) this, new Vec3d(0.0, -vec3d2.y + movement.y, 0.0), box.offset(vec3d2), this.world, list)));
-                    cir.cancel();
+                    return ( vec3d2.add(Entity.adjustMovementForCollisions((Entity) (Object) this, new Vec3d(0.0, -vec3d2.y + movement.y, 0.0), box.offset(vec3d2), this.world, list)));
+
                 }
             }
-            cir.setReturnValue( vec3d);
-            cir.cancel();
+            return ( vec3d);
+        }
+        else {
+            boolean bl4;
+            Box box = this.getBoundingBox();
+            List<VoxelShape> list = this.world.getEntityCollisions((Entity) (Object)this, box.stretch(movement));
+            Vec3d vec3d = movement.lengthSquared() == 0.0 ? movement : Entity.adjustMovementForCollisions((Entity) (Object)this, movement, box, this.world, list);
+            boolean bl = movement.x != vec3d.x;
+            boolean bl2 = movement.y != vec3d.y;
+            boolean bl3 = movement.z != vec3d.z;
+            boolean bl5 = bl4 = this.onGround || bl2 && movement.y < 0.0;
+            if (this.stepHeight > 0.0f && bl4 && (bl || bl3)) {
+                Vec3d vec3d4;
+                Vec3d vec3d2 = Entity.adjustMovementForCollisions((Entity) (Object)this, new Vec3d(movement.x, this.stepHeight, movement.z), box, this.world, list);
+                Vec3d vec3d3 = Entity.adjustMovementForCollisions((Entity) (Object)this, new Vec3d(0.0, this.stepHeight, 0.0), box.stretch(movement.x, 0.0, movement.z), this.world, list);
+                if (vec3d3.y < (double) this.stepHeight && (vec3d4 = Entity.adjustMovementForCollisions((Entity) (Object)this, new Vec3d(movement.x, 0.0, movement.z), box.offset(vec3d3), this.world, list).add(vec3d3)).horizontalLengthSquared() > vec3d2.horizontalLengthSquared()) {
+                    vec3d2 = vec3d4;
+                }
+                if (vec3d2.horizontalLengthSquared() > vec3d.horizontalLengthSquared()) {
+                    return vec3d2.add(Entity.adjustMovementForCollisions((Entity) (Object)this, new Vec3d(0.0, -vec3d2.y + movement.y, 0.0), box.offset(vec3d2), this.world, list));
+                }
+            }
+            return vec3d;
         }
         //ExampleMod.LOGGER.info("continued");
     }
